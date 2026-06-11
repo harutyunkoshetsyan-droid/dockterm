@@ -4,6 +4,8 @@ import { err, type Result } from '@shared/result'
 import { isTrustedSender } from '../security'
 import { registerAppHandlers } from './handlers/app'
 import { registerPtyHandlers } from './handlers/pty'
+import { registerSettingsHandlers } from './handlers/settings'
+import { registerProjectHandlers } from './handlers/project'
 
 /**
  * A registrar binds one channel to one zod schema and one handler. Every call is:
@@ -36,4 +38,6 @@ export function registerIpc(): void {
 
   registerAppHandlers(reg)
   registerPtyHandlers(reg)
+  registerSettingsHandlers(reg)
+  registerProjectHandlers(reg)
 }

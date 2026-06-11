@@ -70,4 +70,5 @@ export interface ProjectInfo {
   path: string
   name: string
   isGitRepo: boolean
+  branch: string | null
 }

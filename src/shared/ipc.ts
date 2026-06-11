@@ -11,6 +11,7 @@
  * main-process registry both validate against the runtime allowlists below.
  */
 import type { Result } from './result'
+import type { Settings, ProjectInfo, RecentProject } from './types'
 
 export interface AppInfo {
   name: string
@@ -55,20 +56,50 @@ export interface PtyExitEvent {
   exitCode: number
 }
 
+/* ------------------------------ project / fs ------------------------------ */
+
+export type OpenDialogResult = { path: string } | { canceled: true }
+export interface PathReq {
+  path: string
+}
+
+export interface WatchEvent {
+  type: 'add' | 'change' | 'unlink' | 'addDir' | 'unlinkDir'
+  relPath: string
+}
+export interface WatchBatch {
+  events: WatchEvent[]
+}
+
+/* -------------------------------- settings -------------------------------- */
+
+export type SettingsPatch = Partial<Pick<Settings, 'terminal' | 'editor' | 'ui' | 'git' | 'claude'>>
+
 /* ------------------------------- channel maps ----------------------------- */
 
 export interface InvokeChannels {
   'app:getInfo': (req: void) => Result<AppInfo>
+
   'pty:create': (req: CreatePtyReq) => Result<CreatePtyRes>
   'pty:write': (req: WritePtyReq) => Result<void>
   'pty:resize': (req: ResizePtyReq) => Result<void>
   'pty:kill': (req: SessionRef) => Result<void>
   'pty:ack': (req: AckPtyReq) => Result<void>
+
+  'settings:get': (req: void) => Result<Settings>
+  'settings:set': (req: SettingsPatch) => Result<Settings>
+
+  'project:openDialog': (req: void) => Result<OpenDialogResult>
+  'project:open': (req: PathReq) => Result<ProjectInfo>
+  'project:getRecent': (req: void) => Result<RecentProject[]>
+  'project:gitInit': (req: PathReq) => Result<ProjectInfo>
 }
 
 export interface EventChannels {
   'pty:data': PtyDataEvent
   'pty:exit': PtyExitEvent
+  'settings:changed': Settings
+  'fs:watch': WatchBatch
 }
 
 export type InvokeChannel = keyof InvokeChannels
@@ -84,11 +115,22 @@ export const INVOKE_CHANNELS: readonly InvokeChannel[] = [
   'pty:write',
   'pty:resize',
   'pty:kill',
-  'pty:ack'
+  'pty:ack',
+  'settings:get',
+  'settings:set',
+  'project:openDialog',
+  'project:open',
+  'project:getRecent',
+  'project:gitInit'
 ]
 
 /** Runtime allowlist mirrored from `EventChannels`. */
-export const EVENT_CHANNELS: readonly EventName[] = ['pty:data', 'pty:exit']
+export const EVENT_CHANNELS: readonly EventName[] = [
+  'pty:data',
+  'pty:exit',
+  'settings:changed',
+  'fs:watch'
+]
 
 export interface DockTermApi {
   invoke<C extends InvokeChannel>(channel: C, req: ReqOf<C>): Promise<ResOf<C>>

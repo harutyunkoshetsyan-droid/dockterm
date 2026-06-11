@@ -1,7 +1,7 @@
 // Standalone runtime smoke check for the terminal hard gate (M1).
 // Launches the *built* app, types a command into the terminal, and screenshots
 // the result so a human (or Claude) can confirm the shell actually responds.
-import { _electron as electron } from 'playwright'
+import { _electron as electron } from '@playwright/test'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 const CWD = 'E:\\dockterm'

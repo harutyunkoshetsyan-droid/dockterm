@@ -2,6 +2,11 @@ appId: com.dockterm.app
 productName: DockTerm
 copyright: Copyright © 2026 DockTerm contributors
 
+# node-pty ships prebuilt N-API binaries (ABI-stable across Node and Electron),
+# so electron-builder must not try to recompile it (its bundled winpty source
+# build is broken on Windows). Linux has no prebuild and is rebuilt in CI.
+npmRebuild: false
+
 directories:
   buildResources: build
   output: release

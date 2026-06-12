@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { FolderTree, GitBranch, GitCompare } from 'lucide-react'
+import { FolderTree, GitBranch, GitCompare, Plug, Sparkles } from 'lucide-react'
 import type { PanelId } from '@shared/types'
 
 export interface PanelDef {
@@ -12,5 +12,7 @@ export interface PanelDef {
 export const PANELS: PanelDef[] = [
   { id: 'files', label: 'Files', icon: FolderTree },
   { id: 'git', label: 'Source Control', icon: GitBranch },
-  { id: 'review', label: 'Review', icon: GitCompare }
+  { id: 'review', label: 'Review', icon: GitCompare },
+  { id: 'mcp', label: 'MCP Servers', icon: Plug },
+  { id: 'skills', label: 'Skills', icon: Sparkles }
 ]

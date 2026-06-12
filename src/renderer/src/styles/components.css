@@ -1018,3 +1018,211 @@
 .review-del {
   color: var(--danger);
 }
+
+/* --------------------------------- MCP ----------------------------------- */
+.mcp-edu {
+  padding: 10px 12px 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 0;
+}
+.mcp-warn {
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+  margin: 0 10px 8px;
+  padding: 8px 10px;
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+.mcp-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 12px 10px;
+  font-size: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.mcp-toggle input {
+  accent-color: var(--accent);
+}
+.mcp-error {
+  margin: 0 10px 8px;
+  padding: 7px 10px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+}
+.mcp-empty {
+  padding: 12px;
+  color: var(--text-faint);
+  font-size: 12.5px;
+}
+.mcp-card {
+  margin: 0 10px 8px;
+  padding: 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.mcp-card__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mcp-card__icon {
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+.mcp-card__name {
+  font-weight: 600;
+  font-size: 13px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mcp-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--raised);
+  color: var(--text-dim);
+  flex: 0 0 auto;
+}
+.mcp-tag--http,
+.mcp-tag--sse {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.mcp-tag--stdio {
+  color: var(--success);
+  background: var(--success-soft);
+}
+.mcp-tag--scope {
+  color: var(--text-faint);
+}
+.mcp-card__cmd {
+  display: block;
+  margin-top: 7px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-dim);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 5px 7px;
+  word-break: break-all;
+}
+.mcp-secrets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+.mcp-secret {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-faint);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.mcp-card__copy {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* -------------------------------- Skills --------------------------------- */
+.skill-row {
+  display: flex;
+  gap: 8px;
+  padding: 7px 10px;
+  cursor: pointer;
+  align-items: flex-start;
+}
+.skill-row--readonly {
+  cursor: default;
+}
+.skill-row:hover {
+  background: var(--raised);
+}
+.skill-row__icon {
+  color: var(--accent);
+  margin-top: 2px;
+  flex: 0 0 auto;
+}
+.skill-row__body {
+  min-width: 0;
+  flex: 1;
+}
+.skill-row__name {
+  font-size: 12.5px;
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+.skill-row__scope {
+  font-size: 9.5px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-left: 6px;
+}
+.skill-row__desc {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.skill-actions {
+  flex-direction: row;
+  gap: 8px;
+}
+.skill-newmenu-wrap {
+  position: relative;
+  flex: 1;
+}
+.skill-newmenu-wrap > .btn {
+  width: 100%;
+}
+.skill-menu {
+  position: absolute;
+  bottom: 38px;
+  left: 0;
+  right: 0;
+  background: var(--overlay);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+}
+.skill-menu button {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 12.5px;
+  text-align: left;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.skill-menu button:hover {
+  background: var(--accent-soft);
+}

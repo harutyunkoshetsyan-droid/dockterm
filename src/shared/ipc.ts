@@ -22,7 +22,10 @@ import type {
   DiffSinceFile,
   DiffContent,
   CheckpointResult,
-  CheckpointStatus
+  CheckpointStatus,
+  McpReadResult,
+  SkillsReadResult,
+  SkillTemplate
 } from './types'
 
 export interface AppInfo {
@@ -179,6 +182,15 @@ export interface InvokeChannels {
   'review:diffFile': (req: { base: ReviewBase; relPath: string }) => Result<DiffContent>
   'checkpoint:create': (req: { label: string }) => Result<CheckpointResult>
   'checkpoint:get': (req: void) => Result<CheckpointStatus>
+
+  'claude:mcpRead': (req: { includeUser: boolean }) => Result<McpReadResult>
+  'claude:mcpCreateTemplate': (req: void) => Result<{ relPath: string }>
+  'claude:skillsRead': (req: { includeUser: boolean }) => Result<SkillsReadResult>
+  'claude:skillCreate': (req: {
+    name: string
+    kind: 'skill' | 'command'
+    template: SkillTemplate
+  }) => Result<{ relPath: string }>
 }
 
 export interface EventChannels {
@@ -231,7 +243,11 @@ export const INVOKE_CHANNELS: readonly InvokeChannel[] = [
   'review:list',
   'review:diffFile',
   'checkpoint:create',
-  'checkpoint:get'
+  'checkpoint:get',
+  'claude:mcpRead',
+  'claude:mcpCreateTemplate',
+  'claude:skillsRead',
+  'claude:skillCreate'
 ]
 
 /** Runtime allowlist mirrored from `EventChannels`. */

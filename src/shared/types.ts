@@ -73,6 +73,65 @@ export interface ProjectInfo {
   branch: string | null
 }
 
+/* ---------------------------------- MCP ---------------------------------- */
+
+export type McpTransport = 'stdio' | 'http' | 'sse' | 'unknown'
+
+export interface McpServerView {
+  name: string
+  scope: 'project' | 'user'
+  transport: McpTransport
+  command?: string
+  url?: string
+  envKeys: string[]
+  headerKeys: string[]
+  sourcePath: string
+}
+
+export interface McpSource {
+  path: string
+  scope: 'project' | 'user'
+  exists: boolean
+  ok: boolean
+  error?: string
+}
+
+export interface McpReadResult {
+  servers: McpServerView[]
+  sources: McpSource[]
+}
+
+/* --------------------------------- Skills -------------------------------- */
+
+export interface SkillView {
+  slashName: string
+  description: string
+  scope: 'project' | 'user'
+  sourcePath: string
+  canOpen: boolean
+  disableModelInvocation: boolean
+}
+
+export interface CommandView {
+  slashName: string
+  description: string
+  scope: 'project' | 'user'
+  sourcePath: string
+  canOpen: boolean
+}
+
+export interface SkillsReadResult {
+  skills: SkillView[]
+  commands: CommandView[]
+}
+
+export type SkillTemplate =
+  | 'brainstorming'
+  | 'ultraplan'
+  | 'review-changes'
+  | 'safe-commit'
+  | 'blank'
+
 /* ---------------------------------- Git ---------------------------------- */
 
 export type GitFileStatus =

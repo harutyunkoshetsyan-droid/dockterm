@@ -3,11 +3,13 @@ import { GitBranchPlus } from 'lucide-react'
 import { useAppStore } from '../../state/useAppStore'
 import { useEditorStore } from '../../state/useEditorStore'
 import { useGitStore } from '../../state/useGitStore'
+import { useReviewStore } from '../../state/useReviewStore'
 import { TopBar } from './TopBar'
 import { Dock } from './Dock'
 import { Divider } from './Divider'
 import { TerminalView } from '../terminal/TerminalView'
 import { EditorPane } from '../editor/EditorPane'
+import { DiffView } from '../review/DiffView'
 
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n))
 
@@ -17,7 +19,9 @@ export function Shell() {
   const initGit = useAppStore((s) => s.initGitRepo)
   const openPanel = useAppStore((s) => s.openPanel)
   const miniTermOpen = useAppStore((s) => s.miniTermOpen)
-  const editorOpen = useEditorStore((s) => s.tabs.length > 0)
+  const hasTabs = useEditorStore((s) => s.tabs.length > 0)
+  const diffTarget = useReviewStore((s) => s.diffTarget)
+  const editorOpen = hasTabs || diffTarget != null
 
   const [dockW, setDockW] = useState(260)
   const [editorW, setEditorW] = useState(520)
@@ -92,7 +96,7 @@ export function Shell() {
           )}
           {editorOpen && (
             <div className="editor-wrap" style={{ width: editorW }} key="editor">
-              <EditorPane />
+              {diffTarget ? <DiffView /> : <EditorPane />}
             </div>
           )}
         </div>

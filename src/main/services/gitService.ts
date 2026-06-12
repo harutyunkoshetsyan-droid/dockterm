@@ -1,7 +1,16 @@
 import { simpleGit, type SimpleGit } from 'simple-git'
 import { getProjectRoot } from './projectContext'
 import { statusToView, notRepoView } from './gitStatusMap'
-import type { GitStatusView, GitBranches, CommitResultView } from '@shared/types'
+import { readFile as readWorkingFile } from './fileService'
+import type {
+  GitStatusView,
+  GitBranches,
+  CommitResultView,
+  GitFileStatus,
+  ReviewBase,
+  DiffSinceFile,
+  DiffContent
+} from '@shared/types'
 
 /**
  * Every git invocation goes through here. `core.hooksPath=` neutralizes any hooks
@@ -104,4 +113,109 @@ export async function switchBranch(name: string): Promise<void> {
 export async function deleteBranch(name: string): Promise<void> {
   // Non-force: git refuses to delete a branch with unmerged commits.
   await git().deleteLocalBranch(name, false)
+}
+
+export async function headHash(): Promise<string> {
+  return git().revparse(['HEAD'])
+}
+
+export async function isReachable(hash: string): Promise<boolean> {
+  try {
+    await git().raw(['cat-file', '-e', `${hash}^{commit}`])
+    return true
+  } catch {
+    return false
+  }
+}
+
+function parseNumstat(out: string): { path: string; ins: number; del: number }[] {
+  const rows: { path: string; ins: number; del: number }[] = []
+  for (const line of out.split('\n')) {
+    const parts = line.trim().split('\t')
+    if (parts.length < 3) continue
+    const ins = parts[0] === '-' ? 0 : Number.parseInt(parts[0], 10) || 0
+    const del = parts[1] === '-' ? 0 : Number.parseInt(parts[1], 10) || 0
+    rows.push({ path: parts[2], ins, del })
+  }
+  return rows
+}
+
+/** Files changed relative to a baseline: the working tree (uncommitted), this
+ * session (watcher-tracked), or a saved checkpoint commit. */
+export async function changedSince(
+  base: ReviewBase,
+  checkpointHash: string | null,
+  sessionPaths: string[]
+): Promise<DiffSinceFile[]> {
+  const g = git()
+
+  if (base === 'checkpoint') {
+    if (!checkpointHash) return []
+    const numstat = await g.raw(['diff', '--numstat', checkpointHash])
+    const files: DiffSinceFile[] = parseNumstat(numstat).map((n) => ({
+      relPath: n.path,
+      status: 'modified',
+      insertions: n.ins,
+      deletions: n.del
+    }))
+    const seen = new Set(files.map((f) => f.relPath))
+    const status = await getStatus()
+    for (const u of status.untracked) {
+      if (!seen.has(u.path)) {
+        files.push({ relPath: u.path, status: 'untracked', insertions: 0, deletions: 0 })
+      }
+    }
+    return files
+  }
+
+  const status = await getStatus()
+  const map = new Map<string, DiffSinceFile>()
+  const add = (path: string, fileStatus: GitFileStatus) => {
+    if (!map.has(path)) map.set(path, { relPath: path, status: fileStatus, insertions: 0, deletions: 0 })
+  }
+  for (const f of status.staged) add(f.path, f.status)
+  for (const f of status.unstaged) add(f.path, f.status)
+  for (const f of status.untracked) add(f.path, 'untracked')
+
+  try {
+    for (const n of parseNumstat(await g.raw(['diff', '--numstat', 'HEAD']))) {
+      const entry = map.get(n.path)
+      if (entry) {
+        entry.insertions = n.ins
+        entry.deletions = n.del
+      }
+    }
+  } catch {
+    // empty repo: no HEAD to diff against
+  }
+
+  let files = [...map.values()]
+  if (base === 'session') {
+    const allowed = new Set(sessionPaths)
+    files = files.filter((f) => allowed.has(f.relPath))
+  }
+  return files
+}
+
+/** Original (baseline) and current content for a single file's diff view. */
+export async function diffFile(
+  base: ReviewBase,
+  checkpointHash: string | null,
+  relPath: string
+): Promise<DiffContent> {
+  const ref = base === 'checkpoint' && checkpointHash ? checkpointHash : 'HEAD'
+  let original = ''
+  try {
+    original = await git().show([`${ref}:${relPath}`])
+  } catch {
+    original = '' // new file, or no baseline commit
+  }
+  let modified = ''
+  try {
+    const result = await readWorkingFile(relPath)
+    modified = result.kind === 'text' ? result.content : ''
+  } catch {
+    modified = '' // deleted in the working tree
+  }
+  return { relPath, original, modified }
 }

@@ -1,12 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { monaco } from './monacoEnv'
-import { dockTermDark } from './monacoTheme'
 import { DEFAULT_MONO } from '../terminal/terminalTheme'
 import { EditorTabs } from './EditorTabs'
 import { useEditorStore } from '../../state/useEditorStore'
 import { useAppStore } from '../../state/useAppStore'
-
-let themeDefined = false
 
 function modelUri(relPath: string): monaco.Uri {
   return monaco.Uri.parse(`inmemory://dockterm/${relPath}`)
@@ -21,10 +18,6 @@ export function EditorPane() {
 
   useEffect(() => {
     if (!containerRef.current) return
-    if (!themeDefined) {
-      monaco.editor.defineTheme('dockterm-dark', dockTermDark)
-      themeDefined = true
-    }
     const editor = monaco.editor.create(containerRef.current, {
       theme: 'dockterm-dark',
       automaticLayout: true,

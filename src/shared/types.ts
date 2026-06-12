@@ -120,3 +120,27 @@ export interface CommitResultView {
   hash: string
   summary: string
 }
+
+/* -------------------------------- Review --------------------------------- */
+
+export type ReviewBase = 'working' | 'session' | 'checkpoint'
+
+export interface DiffSinceFile {
+  relPath: string
+  status: GitFileStatus
+  insertions: number
+  deletions: number
+}
+
+export interface DiffContent {
+  relPath: string
+  original: string
+  modified: string
+}
+
+export type CheckpointResult = { checkpoint: Checkpoint } | { dirty: true }
+
+export interface CheckpointStatus {
+  checkpoint: Checkpoint | null
+  stale: boolean
+}

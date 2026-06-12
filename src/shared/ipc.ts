@@ -17,7 +17,12 @@ import type {
   RecentProject,
   GitStatusView,
   GitBranches,
-  CommitResultView
+  CommitResultView,
+  ReviewBase,
+  DiffSinceFile,
+  DiffContent,
+  CheckpointResult,
+  CheckpointStatus
 } from './types'
 
 export interface AppInfo {
@@ -169,6 +174,11 @@ export interface InvokeChannels {
   'git:createBranch': (req: BranchReq) => Result<void>
   'git:switchBranch': (req: BranchReq) => Result<void>
   'git:deleteBranch': (req: BranchReq) => Result<void>
+
+  'review:list': (req: { base: ReviewBase }) => Result<DiffSinceFile[]>
+  'review:diffFile': (req: { base: ReviewBase; relPath: string }) => Result<DiffContent>
+  'checkpoint:create': (req: { label: string }) => Result<CheckpointResult>
+  'checkpoint:get': (req: void) => Result<CheckpointStatus>
 }
 
 export interface EventChannels {
@@ -217,7 +227,11 @@ export const INVOKE_CHANNELS: readonly InvokeChannel[] = [
   'git:branches',
   'git:createBranch',
   'git:switchBranch',
-  'git:deleteBranch'
+  'git:deleteBranch',
+  'review:list',
+  'review:diffFile',
+  'checkpoint:create',
+  'checkpoint:get'
 ]
 
 /** Runtime allowlist mirrored from `EventChannels`. */

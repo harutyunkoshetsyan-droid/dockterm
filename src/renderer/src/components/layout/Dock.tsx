@@ -1,6 +1,7 @@
 import { useAppStore } from '../../state/useAppStore'
 import { FileTree } from '../files/FileTree'
 import { GitPanel } from '../git/GitPanel'
+import { ReviewPanel } from '../review/ReviewPanel'
 
 export function Dock() {
   const openPanel = useAppStore((s) => s.openPanel)
@@ -10,6 +11,7 @@ export function Dock() {
     <aside className="dock">
       {openPanel === 'files' && <FileTree />}
       {openPanel === 'git' && <GitPanel />}
+      {openPanel === 'review' && <ReviewPanel />}
     </aside>
   )
 }

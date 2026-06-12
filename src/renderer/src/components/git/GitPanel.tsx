@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { useGitStore } from '../../state/useGitStore'
 import { useAppStore } from '../../state/useAppStore'
-import { useEditorStore } from '../../state/useEditorStore'
+import { useReviewStore } from '../../state/useReviewStore'
 import { useDialogStore } from '../../state/useDialogStore'
 import type { GitFileEntry, GitFileStatus } from '@shared/types'
 
@@ -29,11 +29,6 @@ const BADGE: Record<GitFileStatus, { letter: string; cls: string }> = {
   typechange: { letter: 'T', cls: 'mod' },
   untracked: { letter: 'U', cls: 'unt' },
   conflicted: { letter: '!', cls: 'con' }
-}
-
-function baseName(p: string): string {
-  const i = p.lastIndexOf('/')
-  return i >= 0 ? p.slice(i + 1) : p
 }
 
 function Section({
@@ -63,7 +58,6 @@ export function GitPanel() {
   const store = useGitStore()
   const status = store.status
   const beginner = useAppStore((s) => s.settings?.git.beginnerMode ?? true)
-  const openFile = useEditorStore((s) => s.open)
   const initGit = useAppStore((s) => s.initGitRepo)
   const [message, setMessage] = useState('')
   const [branchMenu, setBranchMenu] = useState(false)
@@ -105,7 +99,7 @@ export function GitPanel() {
         <span
           className="git-row__path"
           title={file.path}
-          onClick={() => void openFile(file.path, baseName(file.path))}
+          onClick={() => void useReviewStore.getState().openDiff(file.path, 'working')}
         >
           {file.origPath ? `${file.origPath} → ${file.path}` : file.path}
         </span>

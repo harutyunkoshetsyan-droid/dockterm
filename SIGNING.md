@@ -25,6 +25,25 @@ Repo → **Settings → Secrets and variables → Actions → New repository sec
 > ⚠️ These are signing keys. Add them only in GitHub's secrets UI. Never paste
 > the `.p12`, its base64, or any password into chat, issues, or commits.
 
+## Preferred: App Store Connect API key (more reliable in CI)
+
+The Apple-ID + app-specific-password method works but `notarytool` can hang for
+hours on Apple's side. Apple's recommended CI method is an **App Store Connect
+API key**, which the pipeline uses automatically when these three secrets exist
+(it falls back to the Apple-ID method otherwise):
+
+| Secret name         | Value |
+|---------------------|-------|
+| `APPLE_API_KEY_P8`  | the full contents of the downloaded `AuthKey_XXXX.p8` file |
+| `APPLE_API_KEY_ID`  | the Key ID (e.g. `ABC123DEF4`) |
+| `APPLE_API_ISSUER`  | the Issuer ID (a UUID) |
+
+Create it: **App Store Connect → Users and Access → Integrations →
+App Store Connect API → Team Keys → ＋** → name it `dockterm-notarize`, Access
+**Developer** → Generate. **Download the `.p8` (one time only)**; copy the Key ID
+from the list and the Issuer ID from the top of the page. `CSC_LINK` +
+`CSC_KEY_PASSWORD` (the signing cert) are still required.
+
 ## Getting each value
 
 **Developer ID Application cert** (note: this is *different* from the

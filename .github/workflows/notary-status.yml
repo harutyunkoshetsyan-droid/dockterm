@@ -1,0 +1,24 @@
+name: Notary Status
+
+# Manual diagnostic: ask Apple for the status/history of recent notarization
+# submissions using the App Store Connect API key already in repo secrets.
+on:
+  workflow_dispatch:
+
+jobs:
+  status:
+    runs-on: macos-14
+    steps:
+      - name: notarytool history
+        env:
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        run: |
+          mkdir -p "$HOME/private_keys"
+          printf '%s' "$APPLE_API_KEY_P8" > "$HOME/private_keys/AuthKey.p8"
+          echo "===== notarytool history ====="
+          xcrun notarytool history \
+            --key "$HOME/private_keys/AuthKey.p8" \
+            --key-id "$APPLE_API_KEY_ID" \
+            --issuer "$APPLE_API_ISSUER"

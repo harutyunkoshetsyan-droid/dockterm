@@ -37,8 +37,28 @@ jobs:
         run: npm run build
 
       - name: Package and publish installer
-        run: npx --no-install electron-builder ${{ matrix.args }} --publish always
+        shell: bash
+        # macOS: if the Apple signing secrets are configured (see SIGNING.md) the
+        # .dmg is signed with the Developer ID cert and notarized by Apple, so it
+        # opens with no Gatekeeper warning. If the secrets are absent (or on
+        # Windows/Linux), it builds unsigned exactly as before. The Apple/cert
+        # env is only injected on macOS runners so it can never be mistaken for a
+        # Windows signing cert.
+        run: |
+          if [ -n "$APPLE_ID" ]; then
+            echo "Apple credentials present — signing + notarizing macOS build"
+            npx --no-install electron-builder ${{ matrix.args }} --publish always -c.mac.notarize=true
+          else
+            echo "No Apple credentials — building unsigned"
+            export CSC_IDENTITY_AUTO_DISCOVERY=false
+            npx --no-install electron-builder ${{ matrix.args }} --publish always
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # No code-signing certificates in V1 — produce unsigned artifacts.
-          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          # Mac-only: Developer ID cert (.p12 → base64) + its password.
+          CSC_LINK: ${{ startsWith(matrix.os, 'macos') && secrets.CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ startsWith(matrix.os, 'macos') && secrets.CSC_KEY_PASSWORD || '' }}
+          # Mac-only: Apple notarization credentials.
+          APPLE_ID: ${{ startsWith(matrix.os, 'macos') && secrets.APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ startsWith(matrix.os, 'macos') && secrets.APPLE_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ startsWith(matrix.os, 'macos') && secrets.APPLE_TEAM_ID || '' }}

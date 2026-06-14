@@ -37,7 +37,15 @@ mac:
     - target: dmg
       arch: [arm64, x64]
   category: public.app-category.developer-tools
-  identity: null
+  # Code signing + notarization are driven entirely by environment/secrets in CI
+  # (see .github/workflows/release.yml and SIGNING.md). When no Apple cert is
+  # present the build falls back to an unsigned .dmg instead of failing.
+  # Hardened runtime + these entitlements are required for Apple notarization;
+  # they are no-ops when the build is unsigned.
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.inherit.plist
   artifactName: ${productName}-${version}-mac-${arch}.${ext}
 
 dmg:

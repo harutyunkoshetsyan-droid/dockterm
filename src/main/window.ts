@@ -7,8 +7,8 @@ export function createMainWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1280,
     height: 820,
-    minWidth: 880,
-    minHeight: 560,
+    minWidth: 480,
+    minHeight: 320,
     show: false,
     backgroundColor: '#0d0d0f',
     title: 'DockTerm',

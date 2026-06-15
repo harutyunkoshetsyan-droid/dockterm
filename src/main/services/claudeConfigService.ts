@@ -3,7 +3,7 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { getProjectRoot } from './projectContext'
 import { safeUrl, keysOf } from './secretMask'
-import type { McpServerView, McpSource, McpReadResult, McpTransport } from '@shared/types'
+import type { McpServerView, McpSource, McpReadResult, McpTransport, McpScope } from '@shared/types'
 
 const MCP_TEMPLATE = `{
   "mcpServers": {
@@ -28,7 +28,7 @@ function inferTransport(def: Record<string, unknown>): McpTransport {
   return 'unknown'
 }
 
-function parseServers(raw: unknown, scope: 'project' | 'user', sourcePath: string): McpServerView[] {
+function parseServers(raw: unknown, scope: McpScope, sourcePath: string): McpServerView[] {
   const servers: McpServerView[] = []
   const mcp = (raw as { mcpServers?: unknown } | null)?.mcpServers
   if (!mcp || typeof mcp !== 'object') return servers
@@ -56,7 +56,7 @@ function parseServers(raw: unknown, scope: 'project' | 'user', sourcePath: strin
 
 function readInto(
   file: string,
-  scope: 'project' | 'user',
+  scope: McpScope,
   sources: McpSource[],
   servers: McpServerView[]
 ): void {
@@ -73,6 +73,40 @@ function readInto(
   }
 }
 
+/**
+ * Reads `~/.claude.json`, which holds MCP servers in TWO places:
+ *  - top-level `mcpServers`        → "user" scope (added with `claude mcp add -s user`)
+ *  - `projects[<root>].mcpServers` → "local" scope (the DEFAULT for `claude mcp add`)
+ * The local block is what most users actually have, so we surface both.
+ */
+function readUserConfig(
+  file: string,
+  projectRoot: string,
+  sources: McpSource[],
+  servers: McpServerView[]
+): void {
+  if (!existsSync(file)) {
+    sources.push({ path: file, scope: 'user', exists: false, ok: true })
+    return
+  }
+  try {
+    const text = readFileSync(file, 'utf8').replace(/^﻿/, '')
+    const json = JSON.parse(text) as { projects?: Record<string, unknown> }
+    servers.push(...parseServers(json, 'user', file))
+    const projects = json.projects
+    if (projects && typeof projects === 'object') {
+      // Match the current project's entry, tolerating a trailing-slash difference.
+      const key = Object.keys(projects).find(
+        (k) => k === projectRoot || k.replace(/[/\\]+$/, '') === projectRoot.replace(/[/\\]+$/, '')
+      )
+      if (key) servers.push(...parseServers(projects[key], 'local', file))
+    }
+    sources.push({ path: file, scope: 'user', exists: true, ok: true })
+  } catch {
+    sources.push({ path: file, scope: 'user', exists: true, ok: false, error: 'Could not parse JSON' })
+  }
+}
+
 /** Reads configured MCP servers. User scope (~/.claude.json) is only read when
  * `includeUser` is true — the handler additionally gates this on the user's
  * opt-in setting. Secret values are never returned; only key names and a
@@ -80,9 +114,10 @@ function readInto(
 export function readMcp(includeUser: boolean): McpReadResult {
   const sources: McpSource[] = []
   const servers: McpServerView[] = []
-  readInto(join(getProjectRoot(), '.mcp.json'), 'project', sources, servers)
+  const root = getProjectRoot()
+  readInto(join(root, '.mcp.json'), 'project', sources, servers)
   if (includeUser) {
-    readInto(join(homedir(), '.claude.json'), 'user', sources, servers)
+    readUserConfig(join(homedir(), '.claude.json'), root, sources, servers)
   }
   return { servers, sources }
 }

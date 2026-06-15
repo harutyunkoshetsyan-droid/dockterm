@@ -77,9 +77,11 @@ export interface ProjectInfo {
 
 export type McpTransport = 'stdio' | 'http' | 'sse' | 'unknown'
 
+export type McpScope = 'project' | 'user' | 'local'
+
 export interface McpServerView {
   name: string
-  scope: 'project' | 'user'
+  scope: McpScope
   transport: McpTransport
   command?: string
   url?: string
@@ -90,7 +92,7 @@ export interface McpServerView {
 
 export interface McpSource {
   path: string
-  scope: 'project' | 'user'
+  scope: McpScope
   exists: boolean
   ok: boolean
   error?: string

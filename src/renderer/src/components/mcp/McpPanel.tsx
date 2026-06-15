@@ -70,7 +70,7 @@ export function McpPanel() {
         </div>
         <label className="mcp-toggle">
           <input type="checkbox" checked={readUserConfig} onChange={() => void toggleUser()} />
-          Include my user servers (~/.claude.json)
+          Include servers from ~/.claude.json (your user &amp; local-scope servers)
         </label>
 
         {errors.map((e) => (

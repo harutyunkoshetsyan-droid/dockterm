@@ -78,3 +78,37 @@ jobs:
           APPLE_ID: ${{ startsWith(matrix.os, 'macos') && secrets.APPLE_ID || '' }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ startsWith(matrix.os, 'macos') && secrets.APPLE_APP_SPECIFIC_PASSWORD || '' }}
           APPLE_TEAM_ID: ${{ startsWith(matrix.os, 'macos') && secrets.APPLE_TEAM_ID || '' }}
+
+  # After all platforms upload, give the release human-friendly asset names,
+  # drop the unused auto-updater metadata, and write a clear download guide.
+  finalize:
+    name: Tidy release assets
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Friendly names + download notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+          TAG="${{ github.ref_name }}"
+          VER="${TAG#v}"
+          gh api "repos/$REPO/releases" \
+            -q ".[] | select(.tag_name==\"$TAG\") | .assets[] | \"\(.id) \(.name)\"" \
+            | while read -r ID NAME; do
+                case "$NAME" in
+                  *.blockmap|latest*.yml)
+                    gh api --method DELETE "repos/$REPO/releases/assets/$ID" ;;
+                  *mac-arm64.dmg)
+                    gh api --method PATCH "repos/$REPO/releases/assets/$ID" -f name="DockTerm-$VER-macOS-Apple-Silicon.dmg" >/dev/null ;;
+                  *mac-x64.dmg)
+                    gh api --method PATCH "repos/$REPO/releases/assets/$ID" -f name="DockTerm-$VER-macOS-Intel.dmg" >/dev/null ;;
+                  *windows-x64.exe)
+                    gh api --method PATCH "repos/$REPO/releases/assets/$ID" -f name="DockTerm-$VER-Windows.exe" >/dev/null ;;
+                  *linux-x86_64.AppImage)
+                    gh api --method PATCH "repos/$REPO/releases/assets/$ID" -f name="DockTerm-$VER-Linux.AppImage" >/dev/null ;;
+                esac
+              done
+          sed "s/__VER__/$VER/g" .github/RELEASE_NOTES.md > /tmp/notes.md
+          gh release edit "$TAG" -R "$REPO" --notes-file /tmp/notes.md

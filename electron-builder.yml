@@ -31,6 +31,8 @@ nsis:
   perMachine: false
   allowToChangeInstallationDirectory: true
   deleteAppDataOnUninstall: false
+  # No auto-updater, so skip the differential-download .blockmap sidecar file.
+  differentialPackage: false
 
 mac:
   target:

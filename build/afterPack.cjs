@@ -1,5 +1,35 @@
 const path = require('node:path')
+const fs = require('node:fs')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
+
+/**
+ * node-pty spawns the shell on macOS/Linux via a small `spawn-helper` binary.
+ * Packing it into app.asar.unpacked (and some npm extractions) can drop its
+ * executable permission bit, which makes node-pty fail with "posix_spawnp
+ * failed". Restore +x on every spawn-helper before electron-builder code-signs
+ * the app, so the signed/notarized binary is runnable. Runs before signing.
+ */
+function fixSpawnHelperPerms(root) {
+  let entries
+  try {
+    entries = fs.readdirSync(root, { withFileTypes: true })
+  } catch {
+    return
+  }
+  for (const entry of entries) {
+    const full = path.join(root, entry.name)
+    if (entry.isDirectory()) {
+      fixSpawnHelperPerms(full)
+    } else if (entry.name === 'spawn-helper') {
+      try {
+        fs.chmodSync(full, 0o755)
+        console.log('afterPack: restored +x on', full)
+      } catch (err) {
+        console.warn('afterPack: could not chmod', full, err.message)
+      }
+    }
+  }
+}
 
 /**
  * Flips Electron fuses at package time to shrink the runtime attack surface:
@@ -18,6 +48,15 @@ exports.default = async function afterPack(context) {
     electronBinary = path.join(appOutDir, `${appName}.exe`)
   } else {
     electronBinary = path.join(appOutDir, appName.toLowerCase())
+  }
+
+  // Restore the node-pty spawn-helper executable bit (macOS & Linux) before signing.
+  if (electronPlatformName === 'darwin') {
+    fixSpawnHelperPerms(
+      path.join(appOutDir, `${appName}.app`, 'Contents', 'Resources', 'app.asar.unpacked')
+    )
+  } else if (electronPlatformName === 'linux') {
+    fixSpawnHelperPerms(path.join(appOutDir, 'resources', 'app.asar.unpacked'))
   }
 
   await flipFuses(electronBinary, {

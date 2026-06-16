@@ -1,10 +1,12 @@
-/** Pure tab-workspace reducers (no React, fully unit-tested). A "tab" is one
- * terminal in Milestone B; Milestone C generalizes a tab to a pane tree. */
+/** Pure tab-list reducers (no React, fully unit-tested). Each tab owns a tiling
+ * `layout` of terminals (see layout.ts); these reducers only manage the tab list. */
+import type { LayoutNode } from './layout'
 
 export interface WsTab {
   id: string
   title: string
-  cwd: string
+  layout: LayoutNode
+  focusedLeafId: string
 }
 
 export interface WsState {

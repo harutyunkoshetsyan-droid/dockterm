@@ -1,7 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import { addTab, removeTab, reorderTabs, renameTab, type WsState } from '@renderer/state/workspace'
 
-const tab = (id: string) => ({ id, title: id, cwd: '/p' })
+const tab = (id: string) => ({
+  id,
+  title: id,
+  layout: { type: 'leaf' as const, id: `${id}-leaf`, cwd: '/p', title: id },
+  focusedLeafId: `${id}-leaf`
+})
 const base: WsState = { tabs: [tab('a'), tab('b'), tab('c')], activeId: 'b' }
 
 describe('workspace reducers', () => {

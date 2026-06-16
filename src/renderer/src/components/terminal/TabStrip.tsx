@@ -1,7 +1,16 @@
 import { useRef, useState } from 'react'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, LayoutGrid } from 'lucide-react'
 import { useWorkspaceStore } from '../../state/useWorkspaceStore'
 import { useAppStore } from '../../state/useAppStore'
+import { firstLeaf } from '../../state/layout'
+
+const GRID_PRESETS: { label: string; rows: number; cols: number }[] = [
+  { label: '1', rows: 1, cols: 1 },
+  { label: '2 × 1', rows: 1, cols: 2 },
+  { label: '2 × 2', rows: 2, cols: 2 },
+  { label: '3 × 2', rows: 2, cols: 3 },
+  { label: '3 × 3', rows: 3, cols: 3 }
+]
 
 export function TabStrip() {
   const tabs = useWorkspaceStore((s) => s.tabs)
@@ -12,9 +21,11 @@ export function TabStrip() {
   const open = useWorkspaceStore((s) => s.open)
   const rename = useWorkspaceStore((s) => s.rename)
   const reorder = useWorkspaceStore((s) => s.reorder)
+  const makeGrid = useWorkspaceStore((s) => s.makeGrid)
   const projectPath = useAppStore((s) => s.project?.path)
 
   const [editing, setEditing] = useState<string | null>(null)
+  const [gridOpen, setGridOpen] = useState(false)
   const dragFrom = useRef<number | null>(null)
 
   return (
@@ -25,7 +36,7 @@ export function TabStrip() {
             key={t.id}
             className={`tab${t.id === activeId ? ' tab--active' : ''}`}
             draggable={editing !== t.id}
-            title={t.cwd}
+            title={firstLeaf(t.layout).cwd}
             onMouseDown={() => setActive(t.id)}
             onDoubleClick={() => setEditing(t.id)}
             onDragStart={() => {
@@ -79,6 +90,32 @@ export function TabStrip() {
       >
         <Plus size={14} />
       </button>
+      <div className="tabstrip__grid">
+        <button
+          className="tabstrip__add"
+          title="Arrange this tab as a grid"
+          onClick={() => setGridOpen((o) => !o)}
+        >
+          <LayoutGrid size={14} />
+        </button>
+        {gridOpen && (
+          <div className="grid-menu" onMouseLeave={() => setGridOpen(false)}>
+            <div className="grid-menu__label">Split this tab into…</div>
+            {GRID_PRESETS.map((p) => (
+              <button
+                key={p.label}
+                onClick={() => {
+                  makeGrid(p.rows, p.cols)
+                  setGridOpen(false)
+                }}
+              >
+                {p.label}
+                {p.rows * p.cols > 1 ? ` · ${p.rows * p.cols} terminals` : ' · single'}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

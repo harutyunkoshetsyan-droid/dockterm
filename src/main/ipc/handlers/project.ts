@@ -10,6 +10,7 @@ import {
 } from '../../services/settingsService'
 import { startWatching } from '../../services/watcherService'
 import { setActiveRoot } from '../../services/activeRoot'
+import { resolveProjectRoot } from '../../services/projectResolve'
 import type { Registrar } from '../register'
 
 const pathSchema = z.object({ path: z.string().min(1).max(4096) })
@@ -42,7 +43,8 @@ export function registerProjectHandlers(reg: Registrar): void {
   })
 
   reg('project:setActiveRoot', pathSchema, (req, event) => {
-    setActiveRoot(event.sender.id, req.path)
+    // `req.path` may be any terminal cwd; the dock targets its project root.
+    setActiveRoot(event.sender.id, resolveProjectRoot(req.path))
     return ok(undefined)
   })
 

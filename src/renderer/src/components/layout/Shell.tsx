@@ -5,11 +5,12 @@ import { useEditorStore } from '../../state/useEditorStore'
 import { useGitStore } from '../../state/useGitStore'
 import { useReviewStore } from '../../state/useReviewStore'
 import { useWorkspaceStore } from '../../state/useWorkspaceStore'
+import { allLeaves, findLeaf } from '../../state/layout'
 import { TopBar } from './TopBar'
 import { Dock } from './Dock'
 import { Divider } from './Divider'
 import { TabStrip } from '../terminal/TabStrip'
-import { TerminalView } from '../terminal/TerminalView'
+import { PaneTree } from '../terminal/PaneTree'
 import { MiniTerminal } from '../terminal/MiniTerminal'
 import { EditorPane } from '../editor/EditorPane'
 import { DiffView } from '../review/DiffView'
@@ -28,7 +29,6 @@ export function Shell() {
 
   const terminals = useWorkspaceStore((s) => s.tabs)
   const activeId = useWorkspaceStore((s) => s.activeId)
-  const markActivity = useWorkspaceStore((s) => s.markActivity)
 
   const [dockW, setDockW] = useState(260)
   const [editorW, setEditorW] = useState(520)
@@ -37,7 +37,9 @@ export function Shell() {
   const projectPath = project?.path
   const wsProject = useRef<string | null>(null)
 
-  // Set up / switch the terminal workspace for the active project.
+  const activeTab = terminals.find((t) => t.id === activeId)
+  const focusedCwd = activeTab ? findLeaf(activeTab.layout, activeTab.focusedLeafId)?.cwd ?? null : null
+
   useEffect(() => {
     if (!projectPath) return
     const ws = useWorkspaceStore.getState()
@@ -49,7 +51,14 @@ export function Shell() {
     wsProject.current = projectPath
   }, [projectPath])
 
-  // Terminal tab shortcuts (capture phase so they win over the focused xterm).
+  // Point the dock (files/git/…) at the focused pane's project, and refresh.
+  useEffect(() => {
+    if (!focusedCwd) return
+    void window.dockterm.invoke('project:setActiveRoot', { path: focusedCwd })
+    void useGitStore.getState().refresh()
+  }, [focusedCwd])
+
+  // Terminal shortcuts (capture phase so they win over the focused xterm).
   useEffect(() => {
     if (!projectPath) return
     const onKey = (e: KeyboardEvent): void => {
@@ -62,7 +71,11 @@ export function Shell() {
       } else if (e.key === 'w') {
         e.preventDefault()
         e.stopPropagation()
-        ws.close(ws.activeId)
+        ws.closeFocused()
+      } else if (e.key === 'd') {
+        e.preventDefault()
+        e.stopPropagation()
+        ws.splitFocused('row')
       } else if (e.key >= '1' && e.key <= '9') {
         const tab = ws.tabs[Number(e.key) - 1]
         if (tab) {
@@ -74,12 +87,6 @@ export function Shell() {
     }
     window.addEventListener('keydown', onKey, true)
     return () => window.removeEventListener('keydown', onKey, true)
-  }, [projectPath])
-
-  useEffect(() => {
-    if (!projectPath) return
-    void useGitStore.getState().refresh()
-    void useGitStore.getState().refreshBranches()
   }, [projectPath])
 
   useEffect(() => {
@@ -136,15 +143,15 @@ export function Shell() {
               {terminals.map((tab) => (
                 <div
                   key={tab.id}
-                  className="term-pane"
+                  className="term-tabhost"
                   style={{ display: tab.id === activeId ? 'block' : 'none' }}
                 >
-                  <TerminalView
-                    kind="main"
-                    {...termProps}
-                    cwd={tab.cwd}
-                    active={tab.id === activeId}
-                    onActivity={() => markActivity(tab.id)}
+                  <PaneTree
+                    node={tab.layout}
+                    tabId={tab.id}
+                    focusedLeafId={tab.focusedLeafId}
+                    tabActive={tab.id === activeId}
+                    canClose={allLeaves(tab.layout).length > 1 || terminals.length > 1}
                   />
                 </div>
               ))}

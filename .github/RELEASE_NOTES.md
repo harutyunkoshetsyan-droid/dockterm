@@ -3,11 +3,11 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 👋 What's new in v0.7.0 — meet munu
+## 🪄 What's new in v0.8.0 — munu floats free
 
-- **DockTerm has a face now.** Say hi to **munu** — a little mascot that mirrors what Claude Code is doing. A munu sits in the top bar and changes as Claude works: **resting**, **working…**, **needs you** (when Claude pauses for a `[y/n]`), and a happy **done**. It infers state from the terminal itself and never calls an AI of its own.
-- **New app icon & branding** across the app and installer.
-- *Coming next:* munu floats free as an always-on-top pill (Dynamic Island on Mac) so you can glance at it even while DockTerm is in the background — plus one-click approve/deny.
+- **munu now lives above everything.** A little always-on-top pill sits at the top of your screen — over the **notch** on a MacBook — and mirrors what Claude Code is doing across *all* your windows and panes. Watching YouTube fullscreen while Claude works? You'll still see munu flip to **done** or **needs you**.
+- **One-click approve / deny.** When Claude pauses for permission, munu's pill expands to show the command with **[y] yes / [n] no / open** — answer right there (or jump to the terminal). It never auto-answers; the choice is always yours.
+- **Thoughtful touches:** gentle sound cues, an attention glow when Claude needs you, keeps your Mac awake while Claude is working, and a desktop notification if DockTerm is in the background. All toggleable in **Settings → munu**.
 
 ---
 

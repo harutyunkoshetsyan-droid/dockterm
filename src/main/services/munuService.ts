@@ -107,10 +107,15 @@ function maybeNotify(state: MunuState): void {
  * activate, and whenever settings change. */
 export function syncOverlay(): void {
   const m = getSettings().munu
-  if (m.enabled && m.overlay) {
-    createOverlayWindow()
-    pushGlobal()
-  } else {
-    destroyOverlay()
+  try {
+    if (m.enabled && m.overlay) {
+      createOverlayWindow()
+      pushGlobal()
+    } else {
+      destroyOverlay()
+    }
+  } catch (e) {
+    // The floating overlay must never be able to break the app — it's optional.
+    console.error('[munu] overlay sync failed:', e)
   }
 }

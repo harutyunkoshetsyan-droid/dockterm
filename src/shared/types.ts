@@ -40,9 +40,10 @@ export interface ClaudeSettings {
   readUserConfig: boolean
 }
 
-/** Persisted terminal tabs for the window, restored on relaunch. */
+/** Persisted terminal tabs for the window, restored on relaunch. `layout` is the
+ * opaque tiling tree (validated/cast by the renderer). */
 export interface WorkspacePersist {
-  tabs: { id: string; title: string; cwd: string }[]
+  tabs: { id: string; title: string; layout: unknown; focusedLeafId: string }[]
   activeId: string
 }
 

@@ -14,7 +14,14 @@ const checkpointSchema = z.object({
 
 const workspaceSchema = z
   .object({
-    tabs: z.array(z.object({ id: z.string(), title: z.string(), cwd: z.string() })),
+    tabs: z.array(
+      z.object({
+        id: z.string(),
+        title: z.string(),
+        layout: z.any(),
+        focusedLeafId: z.string()
+      })
+    ),
     activeId: z.string()
   })
   .nullable()

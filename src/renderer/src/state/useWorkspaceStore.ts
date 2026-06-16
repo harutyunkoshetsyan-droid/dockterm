@@ -1,43 +1,82 @@
 import { create } from 'zustand'
-import { addTab, removeTab, reorderTabs, renameTab, type WsState, type WsTab } from './workspace'
+import { addTab, removeTab, reorderTabs, renameTab, type WsTab } from './workspace'
+import {
+  splitLeaf,
+  closeLeaf,
+  setSizes,
+  firstLeaf,
+  findLeaf,
+  allLeaves,
+  gridPreset,
+  type LayoutNode,
+  type LeafNode
+} from './layout'
 
 let counter = 0
-const newId = (): string => `tab-${Date.now().toString(36)}-${(++counter).toString(36)}`
+const uid = (p: string): string => `${p}-${Date.now().toString(36)}-${(++counter).toString(36)}`
 
 function titleFromCwd(cwd: string): string {
   return cwd.split(/[\\/]/).filter(Boolean).pop() || 'Terminal'
 }
+function makeLeaf(cwd: string): LeafNode {
+  return { type: 'leaf', id: uid('pane'), cwd, title: titleFromCwd(cwd) }
+}
+function makeTab(cwd: string): WsTab {
+  const leaf = makeLeaf(cwd)
+  return { id: uid('tab'), title: titleFromCwd(cwd), layout: leaf, focusedLeafId: leaf.id }
+}
 
-function persist(state: WsState): void {
+function persist(tabs: WsTab[], activeId: string): void {
   void window.dockterm.invoke('settings:set', {
-    workspace: { tabs: state.tabs, activeId: state.activeId }
+    workspace: {
+      tabs: tabs.map((t) => ({
+        id: t.id,
+        title: t.title,
+        layout: t.layout,
+        focusedLeafId: t.focusedLeafId
+      })),
+      activeId
+    }
   })
 }
 
 interface WorkspaceStore {
   tabs: WsTab[]
   activeId: string
-  /** tabId -> has unseen output while in the background */
+  /** tabId -> has unseen output in the background */
   activity: Record<string, boolean>
   ready: boolean
 
-  /** First-time setup for a window: restore persisted tabs, or open one in `cwd`. */
-  init: (cwd: string, restored: { tabs: WsTab[]; activeId: string } | null) => void
-  /** Replace all tabs with a single fresh terminal in `cwd` (switching projects). */
+  init: (cwd: string, restored: import('@shared/types').WorkspacePersist | null) => void
   resetForProject: (cwd: string) => void
   open: (cwd: string) => void
-  close: (id: string) => void
-  setActive: (id: string) => void
-  rename: (id: string, title: string) => void
+  close: (tabId: string) => void
+  setActive: (tabId: string) => void
+  rename: (tabId: string, title: string) => void
   reorder: (from: number, to: number) => void
-  markActivity: (id: string) => void
+  markActivity: (tabId: string) => void
+
+  // pane-level (operate on the active tab's layout)
+  splitFocused: (dir: 'row' | 'col') => void
+  closeFocused: () => void
+  focusPane: (tabId: string, leafId: string) => void
+  resizeSplit: (splitId: string, sizes: number[]) => void
+  makeGrid: (rows: number, cols: number) => void
 }
 
 export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
-  const apply = (next: WsState): void => {
-    set({ tabs: next.tabs, activeId: next.activeId })
-    persist(next)
+  const commit = (tabs: WsTab[], activeId: string): void => {
+    set({ tabs, activeId })
+    persist(tabs, activeId)
   }
+  const mapActive = (fn: (tab: WsTab) => WsTab): void => {
+    const { tabs, activeId } = get()
+    const next = tabs.map((t) => (t.id === activeId ? fn(t) : t))
+    commit(next, activeId)
+  }
+  const focusedCwd = (tab: WsTab): string =>
+    findLeaf(tab.layout, tab.focusedLeafId)?.cwd ?? firstLeaf(tab.layout).cwd
+
   return {
     tabs: [],
     activeId: '',
@@ -45,54 +84,115 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
     ready: false,
 
     init: (cwd, restored) => {
-      if (restored && restored.tabs.length > 0) {
-        set({
-          tabs: restored.tabs,
-          activeId: restored.tabs.some((t) => t.id === restored.activeId)
+      if (restored && Array.isArray(restored.tabs) && restored.tabs.length > 0) {
+        try {
+          const tabs: WsTab[] = restored.tabs.map((t) => ({
+            id: t.id,
+            title: t.title,
+            layout: t.layout as LayoutNode,
+            focusedLeafId: t.focusedLeafId
+          }))
+          tabs.forEach((t) => {
+            if (allLeaves(t.layout).length === 0) throw new Error('empty layout')
+          })
+          const activeId = tabs.some((t) => t.id === restored.activeId)
             ? restored.activeId
-            : restored.tabs[0].id,
-          activity: {},
-          ready: true
-        })
-      } else {
-        const tab = { id: newId(), title: titleFromCwd(cwd), cwd }
-        set({ tabs: [tab], activeId: tab.id, activity: {}, ready: true })
-        persist({ tabs: [tab], activeId: tab.id })
+            : tabs[0].id
+          set({ tabs, activeId, activity: {}, ready: true })
+          return
+        } catch {
+          // corrupt persisted layout — fall through to a fresh tab
+        }
       }
+      const tab = makeTab(cwd)
+      set({ tabs: [tab], activeId: tab.id, activity: {}, ready: true })
+      persist([tab], tab.id)
     },
 
     resetForProject: (cwd) => {
-      const tab = { id: newId(), title: titleFromCwd(cwd), cwd }
+      const tab = makeTab(cwd)
       set({ activity: {} })
-      apply({ tabs: [tab], activeId: tab.id })
+      commit([tab], tab.id)
     },
 
     open: (cwd) => {
-      apply(addTab(get(), { id: newId(), title: titleFromCwd(cwd), cwd }))
+      const next = addTab(get(), makeTab(cwd))
+      commit(next.tabs, next.activeId)
     },
 
-    close: (id) => {
-      apply(removeTab(get(), id))
+    close: (tabId) => {
+      const next = removeTab(get(), tabId)
+      commit(next.tabs, next.activeId)
       set((s) => {
-        if (!(id in s.activity)) return s
+        if (!(tabId in s.activity)) return s
         const activity = { ...s.activity }
-        delete activity[id]
+        delete activity[tabId]
         return { activity }
       })
     },
 
-    setActive: (id) => {
-      set((s) => ({ activeId: id, activity: { ...s.activity, [id]: false } }))
-      persist({ tabs: get().tabs, activeId: id })
+    setActive: (tabId) => {
+      set((s) => ({ activeId: tabId, activity: { ...s.activity, [tabId]: false } }))
+      persist(get().tabs, tabId)
     },
 
-    rename: (id, title) => apply(renameTab(get(), id, title)),
+    rename: (tabId, title) => {
+      const next = renameTab(get(), tabId, title)
+      commit(next.tabs, next.activeId)
+    },
 
-    reorder: (from, to) => apply(reorderTabs(get(), from, to)),
+    reorder: (from, to) => {
+      const next = reorderTabs(get(), from, to)
+      commit(next.tabs, next.activeId)
+    },
 
-    markActivity: (id) => {
-      if (get().activeId === id) return
-      set((s) => (s.activity[id] ? s : { activity: { ...s.activity, [id]: true } }))
-    }
+    markActivity: (tabId) => {
+      if (get().activeId === tabId) return
+      set((s) => (s.activity[tabId] ? s : { activity: { ...s.activity, [tabId]: true } }))
+    },
+
+    splitFocused: (dir) =>
+      mapActive((tab) => {
+        const leaf = makeLeaf(focusedCwd(tab))
+        return {
+          ...tab,
+          layout: splitLeaf(tab.layout, tab.focusedLeafId, dir, leaf, uid('split')),
+          focusedLeafId: leaf.id
+        }
+      }),
+
+    closeFocused: () => {
+      const { tabs, activeId } = get()
+      const tab = tabs.find((t) => t.id === activeId)
+      if (!tab) return
+      const layout = closeLeaf(tab.layout, tab.focusedLeafId)
+      if (layout === null) {
+        get().close(activeId)
+        return
+      }
+      const next = tabs.map((t) =>
+        t.id === activeId ? { ...t, layout, focusedLeafId: firstLeaf(layout).id } : t
+      )
+      commit(next, activeId)
+    },
+
+    focusPane: (tabId, leafId) => {
+      set((s) => ({
+        activeId: tabId,
+        activity: { ...s.activity, [tabId]: false },
+        tabs: s.tabs.map((t) => (t.id === tabId ? { ...t, focusedLeafId: leafId } : t))
+      }))
+      persist(get().tabs, tabId)
+    },
+
+    resizeSplit: (splitId, sizes) =>
+      mapActive((tab) => ({ ...tab, layout: setSizes(tab.layout, splitId, sizes) })),
+
+    makeGrid: (rows, cols) =>
+      mapActive((tab) => {
+        const cwd = focusedCwd(tab)
+        const layout = gridPreset(rows, cols, () => makeLeaf(cwd), () => uid('split'))
+        return { ...tab, layout, focusedLeafId: firstLeaf(layout).id }
+      })
   }
 })

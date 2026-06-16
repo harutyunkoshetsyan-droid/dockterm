@@ -1,4 +1,8 @@
-## ✨ What's new in v0.5.0 — UX power pack
+## 🛠️ What's new in v0.5.1 — crash fix
+
+- **Fixed a crash that could make the app unusable.** A saved multi-pane / multi-project session could, in rare cases, get into a state that blanked the window on every launch. DockTerm now validates the restored session and, if anything is wrong, shows a recovery screen with a one-click **Reset session & reload** instead of getting stuck. Your files on disk are never touched.
+
+## ✨ New in v0.5.0 — UX power pack
 
 - **See your files, not gibberish.** Click a PNG, JPG, SVG, GIF, etc. and it opens in an image viewer (click to fit/zoom). Binary or oversized files show a tidy card with *Reveal in folder* and *Open externally* instead of garbled text.
 - **Drag a file onto a terminal** to type its full path at the prompt — works from the file tree and from Finder/Explorer. Drag a **folder** onto a pane to point that terminal at a different project.

@@ -24,6 +24,26 @@ export function equalSizes(n: number): number[] {
   return Array.from({ length: n }, () => 100 / n)
 }
 
+/** Structural validation of an untrusted (persisted) layout tree. Guards the
+ * render path against malformed state that would otherwise throw and — with no
+ * error boundary — blank the whole app on every launch. */
+export function isValidLayout(node: unknown): node is LayoutNode {
+  if (!node || typeof node !== 'object') return false
+  const n = node as Record<string, unknown>
+  if (n.type === 'leaf') {
+    return typeof n.id === 'string' && typeof n.cwd === 'string' && typeof n.title === 'string'
+  }
+  if (n.type === 'split') {
+    if (typeof n.id !== 'string') return false
+    if (n.dir !== 'row' && n.dir !== 'col') return false
+    if (!Array.isArray(n.children) || n.children.length < 2) return false
+    if (!Array.isArray(n.sizes) || n.sizes.length !== n.children.length) return false
+    if (!n.sizes.every((s) => typeof s === 'number' && Number.isFinite(s) && s > 0)) return false
+    return n.children.every(isValidLayout)
+  }
+  return false
+}
+
 export function allLeaves(node: LayoutNode): LeafNode[] {
   return node.type === 'leaf' ? [node] : node.children.flatMap(allLeaves)
 }

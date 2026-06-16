@@ -9,6 +9,7 @@ import {
   closeLeaf,
   setSizes,
   setLeafCwd,
+  isValidLayout,
   gridPreset
 } from '@renderer/state/layout'
 
@@ -89,6 +90,35 @@ describe('layout tree', () => {
   it('setLeafCwd leaves the tree unchanged for an unknown id', () => {
     const r = leaf('a')
     expect(setLeafCwd(r, 'z', '/x', 'x')).toMatchObject({ cwd: '/p', title: 'a' })
+  })
+
+  it('isValidLayout accepts well-formed trees and rejects malformed ones', () => {
+    expect(isValidLayout(leaf('a'))).toBe(true)
+    expect(isValidLayout(splitLeaf(leaf('a'), 'a', 'row', leaf('b'), 's1'))).toBe(true)
+
+    expect(isValidLayout(null)).toBe(false)
+    expect(isValidLayout({ type: 'leaf', id: 'a' })).toBe(false) // missing cwd/title
+    expect(isValidLayout({ type: 'split', id: 's', dir: 'row', children: [], sizes: [] })).toBe(
+      false
+    ) // empty split
+    expect(
+      isValidLayout({
+        type: 'split',
+        id: 's',
+        dir: 'row',
+        children: [leaf('a'), leaf('b')],
+        sizes: [100] // length mismatch
+      })
+    ).toBe(false)
+    expect(
+      isValidLayout({
+        type: 'split',
+        id: 's',
+        dir: 'diagonal', // bad dir
+        children: [leaf('a'), leaf('b')],
+        sizes: [50, 50]
+      })
+    ).toBe(false)
   })
 
   it('findLeaf and firstLeaf locate leaves', () => {

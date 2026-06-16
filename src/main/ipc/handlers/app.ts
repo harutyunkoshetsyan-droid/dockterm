@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { ok } from '@shared/result'
 import { APP_NAME } from '@shared/constants'
 import { createWindow, isPrimaryWindow } from '../../window'
+import { applySettingsPatch } from '../../services/settingsService'
 import type { Registrar } from '../register'
 
 export function registerAppHandlers(reg: Registrar): void {
@@ -21,4 +22,13 @@ export function registerAppHandlers(reg: Registrar): void {
   })
 
   reg('window:isPrimary', z.void(), (_req, event) => ok(isPrimaryWindow(event.sender.id)))
+
+  // Last-resort recovery from a poisoned persisted state. `hard` also forgets the
+  // remembered project so the app reopens to a clean welcome screen.
+  reg('app:recover', z.object({ hard: z.boolean() }), (req) => {
+    const patch: Record<string, unknown> = { workspace: null }
+    if (req.hard) patch.lastProjectPath = null
+    applySettingsPatch(patch as never)
+    return ok(undefined)
+  })
 }

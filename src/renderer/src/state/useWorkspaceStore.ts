@@ -8,6 +8,7 @@ import {
   firstLeaf,
   findLeaf,
   allLeaves,
+  isValidLayout,
   gridPreset,
   type LayoutNode,
   type LeafNode
@@ -95,14 +96,31 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
       isPrimaryWindow = isPrimary
       if (isPrimary && restored && Array.isArray(restored.tabs) && restored.tabs.length > 0) {
         try {
-          const tabs: WsTab[] = restored.tabs.map((t) => ({
-            id: t.id,
-            title: t.title,
-            layout: t.layout as LayoutNode,
-            focusedLeafId: t.focusedLeafId
-          }))
-          tabs.forEach((t) => {
-            if (allLeaves(t.layout).length === 0) throw new Error('empty layout')
+          const seenLeafIds = new Set<string>()
+          const seenTabIds = new Set<string>()
+          const tabs: WsTab[] = restored.tabs.map((t) => {
+            // Validate the untrusted persisted tree; anything off resets the
+            // workspace rather than throwing during render (which, with no error
+            // boundary, used to blank the app on every launch).
+            if (!t || typeof t.id !== 'string' || typeof t.focusedLeafId !== 'string') {
+              throw new Error('bad tab')
+            }
+            if (!isValidLayout(t.layout)) throw new Error('bad layout')
+            const layout = t.layout as LayoutNode
+            const leaves = allLeaves(layout)
+            if (leaves.length === 0) throw new Error('empty layout')
+            // Reject duplicate ids — react-resizable-panels needs unique panel ids.
+            if (seenTabIds.has(t.id)) throw new Error('dup tab id')
+            seenTabIds.add(t.id)
+            for (const l of leaves) {
+              if (seenLeafIds.has(l.id)) throw new Error('dup leaf id')
+              seenLeafIds.add(l.id)
+            }
+            // The focused leaf must actually exist in this tab's tree.
+            const focusedLeafId = findLeaf(layout, t.focusedLeafId)
+              ? t.focusedLeafId
+              : firstLeaf(layout).id
+            return { id: t.id, title: typeof t.title === 'string' ? t.title : 'Terminal', layout, focusedLeafId }
           })
           const activeId = tabs.some((t) => t.id === restored.activeId)
             ? restored.activeId

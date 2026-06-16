@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import App from './App'
+import { ErrorBoundary } from './components/common/ErrorBoundary'
 import './styles/tokens.css'
 import './styles/base.css'
 import './styles/components.css'
@@ -13,4 +14,8 @@ if (!container) throw new Error('Root container missing')
 // a console-list helper that can throw "AttachConsole failed" and crash the main
 // process. The effects here own real OS resources (shells, watchers), so the
 // double-invoke is actively harmful rather than a useful check.
-createRoot(container).render(<App />)
+createRoot(container).render(
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
+)

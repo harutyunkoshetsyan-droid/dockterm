@@ -208,6 +208,7 @@ export interface InvokeChannels {
 
   'window:new': (req: void) => Result<void>
   'window:isPrimary': (req: void) => Result<boolean>
+  'app:recover': (req: { hard: boolean }) => Result<void>
 }
 
 export interface EventChannels {
@@ -271,7 +272,8 @@ export const INVOKE_CHANNELS: readonly InvokeChannel[] = [
   'info:get',
   'app:openExternal',
   'window:new',
-  'window:isPrimary'
+  'window:isPrimary',
+  'app:recover'
 ]
 
 /** Runtime allowlist mirrored from `EventChannels`. */

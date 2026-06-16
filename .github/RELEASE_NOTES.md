@@ -1,4 +1,9 @@
-## 🧹 What's new in v0.5.3 — terminal stability
+## 🧭 What's new in v0.6.0 — the dock follows your terminal
+
+- **Files & Git now follow the focused terminal's *live* directory.** With shell integration (on by default), the side panels track where the shell actually is as you `cd` around — focus a pane that's in `roast-me` and you see roast-me's files; focus one in `GlowAI-main` and it switches. Works per-pane, so a grid of different projects "just works." Toggle it in **Settings → Terminal** if you prefer.
+- Under the hood: zsh/bash/PowerShell get a tiny OSC 7 hook (the same technique VS Code uses) that only sources *your own* dotfiles — no network, no secrets — with a clean fallback for other shells.
+
+## 🧹 v0.5.3 — terminal stability
 
 - **Making a grid no longer kills your terminals.** Splitting a tab into a grid now *keeps* your existing terminals (and anything running in them, like a Claude session) — the focused one becomes the first cell and only the extra cells get fresh shells.
 - **No more garbled prompt fragments.** Switching tabs, splitting, or resizing panes no longer makes the shell redraw stray prompt pieces (e.g. `ook-Pro:…`). Terminals now only re-fit when visible, and resizes are debounced into a single clean reflow.

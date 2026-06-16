@@ -1,19 +1,23 @@
 import { create } from 'zustand'
 import { aggregate, type MunuState } from './munuAggregate'
 import type { ClaudeState } from '../components/terminal/claudeStatus'
+import type { MunuAsk, MunuGlobal } from '@shared/types'
 
 interface PaneStatus {
   state: ClaudeState
   ask: string | null
+  tabId: string
 }
 
 interface MunuStore {
   panes: Record<string, PaneStatus>
   /** transient 'done' flags per leaf, set when working→idle settles */
   done: Record<string, boolean>
-  setPaneStatus: (leafId: string, state: ClaudeState, ask: string | null) => void
+  setPaneStatus: (leafId: string, tabId: string, state: ClaudeState, ask: string | null) => void
   removePane: (leafId: string) => void
   munuState: () => MunuState
+  /** This window's aggregate + asking panes, for reporting to main. */
+  snapshot: () => MunuGlobal
 }
 
 const SETTLE_MS = 3000
@@ -23,7 +27,7 @@ export const useMunuStore = create<MunuStore>((set, get) => ({
   panes: {},
   done: {},
 
-  setPaneStatus: (leafId, state, ask) => {
+  setPaneStatus: (leafId, tabId, state, ask) => {
     const prev = get().panes[leafId]?.state
     if (timers[leafId]) {
       clearTimeout(timers[leafId])
@@ -39,7 +43,7 @@ export const useMunuStore = create<MunuStore>((set, get) => ({
         setTimeout(() => set((s) => ({ done: { ...s.done, [leafId]: false } })), SETTLE_MS)
       }, SETTLE_MS)
     }
-    set((s) => ({ panes: { ...s.panes, [leafId]: { state, ask } } }))
+    set((s) => ({ panes: { ...s.panes, [leafId]: { state, ask, tabId } } }))
   },
 
   removePane: (leafId) =>
@@ -61,5 +65,13 @@ export const useMunuStore = create<MunuStore>((set, get) => ({
       done[id] ? 'done' : (p.state as MunuState)
     )
     return aggregate(states)
+  },
+
+  snapshot: () => {
+    const { panes } = get()
+    const asks: MunuAsk[] = Object.entries(panes)
+      .filter(([, p]) => p.state === 'asking')
+      .map(([leafId, p]) => ({ leafId, tabId: p.tabId, command: p.ask }))
+    return { state: get().munuState(), asks }
   }
 }))

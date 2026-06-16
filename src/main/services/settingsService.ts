@@ -60,7 +60,17 @@ const preference = {
   git: z
     .object({ beginnerMode: z.boolean().default(true), confirmDanger: z.boolean().default(true) })
     .default({}),
-  claude: z.object({ readUserConfig: z.boolean().default(false) }).default({})
+  claude: z.object({ readUserConfig: z.boolean().default(false) }).default({}),
+  munu: z
+    .object({
+      enabled: z.boolean().default(true),
+      overlay: z.boolean().default(true),
+      sounds: z.boolean().default(true),
+      attention: z.boolean().default(true),
+      keepAwake: z.boolean().default(true),
+      notifications: z.boolean().default(true)
+    })
+    .default({})
 }
 
 const settingsSchema = z.object({
@@ -74,6 +84,7 @@ const settingsSchema = z.object({
   ui: preference.ui,
   git: preference.git,
   claude: preference.claude,
+  munu: preference.munu,
   theme: z.string().default('dockterm-dark'),
   workspace: workspaceSchema,
   checkpoints: z.record(checkpointSchema).default({})
@@ -86,6 +97,7 @@ export const settingsPatchSchema = z.object({
   ui: preference.ui.optional(),
   git: preference.git.optional(),
   claude: preference.claude.optional(),
+  munu: preference.munu.optional(),
   theme: z.string().optional(),
   workspace: workspaceSchema.optional()
 })

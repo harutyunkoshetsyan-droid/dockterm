@@ -9,7 +9,7 @@ import {
   clearLastProjectIfMatches
 } from '../../services/settingsService'
 import { startWatching } from '../../services/watcherService'
-import { setProjectRoot } from '../../services/projectContext'
+import { setActiveRoot } from '../../services/activeRoot'
 import type { Registrar } from '../register'
 
 const pathSchema = z.object({ path: z.string().min(1).max(4096) })
@@ -29,7 +29,7 @@ export function registerProjectHandlers(reg: Registrar): void {
   reg('project:open', pathSchema, async (req, event) => {
     try {
       const info = await inspectProject(req.path)
-      setProjectRoot(info.path)
+      setActiveRoot(event.sender.id, info.path)
       addRecentProject({ path: info.path, name: info.name, lastOpenedAt: Date.now() })
       const win = BrowserWindow.fromWebContents(event.sender)
       if (win) startWatching(info.path, win)
@@ -39,6 +39,11 @@ export function registerProjectHandlers(reg: Registrar): void {
       clearLastProjectIfMatches(req.path)
       return err('NOT_FOUND', e instanceof Error ? e.message : 'Cannot open project')
     }
+  })
+
+  reg('project:setActiveRoot', pathSchema, (req, event) => {
+    setActiveRoot(event.sender.id, req.path)
+    return ok(undefined)
   })
 
   reg('project:getRecent', z.void(), () =>

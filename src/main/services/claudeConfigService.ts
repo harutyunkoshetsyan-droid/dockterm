@@ -1,7 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { getProjectRoot } from './projectContext'
 import { safeUrl, keysOf } from './secretMask'
 import type { McpServerView, McpSource, McpReadResult, McpTransport, McpScope } from '@shared/types'
 
@@ -111,10 +110,9 @@ function readUserConfig(
  * `includeUser` is true — the handler additionally gates this on the user's
  * opt-in setting. Secret values are never returned; only key names and a
  * credential-stripped URL leave the main process. */
-export function readMcp(includeUser: boolean): McpReadResult {
+export function readMcp(root: string, includeUser: boolean): McpReadResult {
   const sources: McpSource[] = []
   const servers: McpServerView[] = []
-  const root = getProjectRoot()
   readInto(join(root, '.mcp.json'), 'project', sources, servers)
   if (includeUser) {
     readUserConfig(join(homedir(), '.claude.json'), root, sources, servers)
@@ -122,8 +120,8 @@ export function readMcp(includeUser: boolean): McpReadResult {
   return { servers, sources }
 }
 
-export function createMcpTemplate(): string {
-  const file = join(getProjectRoot(), '.mcp.json')
+export function createMcpTemplate(root: string): string {
+  const file = join(root, '.mcp.json')
   if (existsSync(file)) throw new Error('.mcp.json already exists')
   writeFileSync(file, MCP_TEMPLATE, { flag: 'wx' })
   return '.mcp.json'

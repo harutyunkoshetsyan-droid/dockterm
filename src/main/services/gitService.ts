@@ -1,5 +1,4 @@
 import { simpleGit, type SimpleGit } from 'simple-git'
-import { getProjectRoot } from './projectContext'
 import { statusToView, notRepoView } from './gitStatusMap'
 import { readFile as readWorkingFile } from './fileService'
 import type {
@@ -18,12 +17,9 @@ import type {
  * never run its code (CVE-2024-32002 class). A block timeout stops a call from
  * hanging forever if a credential helper dialog is left open.
  */
-function git(): SimpleGit {
+function git(root: string): SimpleGit {
   return simpleGit({
-    baseDir: getProjectRoot(),
-    // Set hooksPath to EMPTY so the (possibly untrusted) repo's hooks never run.
-    // simple-git guards core.hooksPath against malicious *values*; we opt in
-    // because our value is the empty string — the safe, hook-disabling direction.
+    baseDir: root,
     config: ['core.hooksPath='],
     unsafe: { allowUnsafeHooksPath: true },
     trimmed: true,
@@ -31,8 +27,8 @@ function git(): SimpleGit {
   })
 }
 
-export async function getStatus(): Promise<GitStatusView> {
-  const g = git()
+export async function getStatus(root: string): Promise<GitStatusView> {
+  const g = git(root)
   let isRepo = false
   try {
     isRepo = await g.checkIsRepo()
@@ -50,24 +46,24 @@ export async function getStatus(): Promise<GitStatusView> {
   return statusToView(await g.status(), hasCommits)
 }
 
-export async function stage(paths: string[]): Promise<void> {
-  await git().add(paths)
+export async function stage(root: string, paths: string[]): Promise<void> {
+  await git(root).add(paths)
 }
 
-export async function stageAll(): Promise<void> {
-  await git().add(['-A'])
+export async function stageAll(root: string): Promise<void> {
+  await git(root).add(['-A'])
 }
 
-export async function unstage(paths: string[]): Promise<void> {
-  await git().raw(['restore', '--staged', '--', ...paths])
+export async function unstage(root: string, paths: string[]): Promise<void> {
+  await git(root).raw(['restore', '--staged', '--', ...paths])
 }
 
-export async function discard(paths: string[]): Promise<void> {
-  await git().raw(['restore', '--', ...paths])
+export async function discard(root: string, paths: string[]): Promise<void> {
+  await git(root).raw(['restore', '--', ...paths])
 }
 
-export async function commit(message: string): Promise<CommitResultView> {
-  const result = await git().commit(message)
+export async function commit(root: string, message: string): Promise<CommitResultView> {
+  const result = await git(root).commit(message)
   const s = result.summary
   return {
     hash: result.commit || 'HEAD',
@@ -75,11 +71,11 @@ export async function commit(message: string): Promise<CommitResultView> {
   }
 }
 
-export async function push(options: {
-  setUpstream?: boolean
-  forceWithLease?: boolean
-}): Promise<string> {
-  const g = git()
+export async function push(
+  root: string,
+  options: { setUpstream?: boolean; forceWithLease?: boolean }
+): Promise<string> {
+  const g = git(root)
   const args: string[] = []
   if (options.forceWithLease) args.push('--force-with-lease')
   if (options.setUpstream) {
@@ -92,36 +88,36 @@ export async function push(options: {
   return `Pushed ${updates} ref(s) to ${remote}.`
 }
 
-export async function pull(): Promise<string> {
-  const r = await git().pull()
+export async function pull(root: string): Promise<string> {
+  const r = await git(root).pull()
   return `Updated: ${r.summary.changes} change(s), +${r.summary.insertions} -${r.summary.deletions}.`
 }
 
-export async function branches(): Promise<GitBranches> {
-  const b = await git().branchLocal()
+export async function branches(root: string): Promise<GitBranches> {
+  const b = await git(root).branchLocal()
   return { current: b.current || null, all: b.all }
 }
 
-export async function createBranch(name: string): Promise<void> {
-  await git().checkoutLocalBranch(name)
+export async function createBranch(root: string, name: string): Promise<void> {
+  await git(root).checkoutLocalBranch(name)
 }
 
-export async function switchBranch(name: string): Promise<void> {
-  await git().checkout(name)
+export async function switchBranch(root: string, name: string): Promise<void> {
+  await git(root).checkout(name)
 }
 
-export async function deleteBranch(name: string): Promise<void> {
+export async function deleteBranch(root: string, name: string): Promise<void> {
   // Non-force: git refuses to delete a branch with unmerged commits.
-  await git().deleteLocalBranch(name, false)
+  await git(root).deleteLocalBranch(name, false)
 }
 
-export async function headHash(): Promise<string> {
-  return git().revparse(['HEAD'])
+export async function headHash(root: string): Promise<string> {
+  return git(root).revparse(['HEAD'])
 }
 
-export async function isReachable(hash: string): Promise<boolean> {
+export async function isReachable(root: string, hash: string): Promise<boolean> {
   try {
-    await git().raw(['cat-file', '-e', `${hash}^{commit}`])
+    await git(root).raw(['cat-file', '-e', `${hash}^{commit}`])
     return true
   } catch {
     return false
@@ -143,11 +139,12 @@ function parseNumstat(out: string): { path: string; ins: number; del: number }[]
 /** Files changed relative to a baseline: the working tree (uncommitted), this
  * session (watcher-tracked), or a saved checkpoint commit. */
 export async function changedSince(
+  root: string,
   base: ReviewBase,
   checkpointHash: string | null,
   sessionPaths: string[]
 ): Promise<DiffSinceFile[]> {
-  const g = git()
+  const g = git(root)
 
   if (base === 'checkpoint') {
     if (!checkpointHash) return []
@@ -159,7 +156,7 @@ export async function changedSince(
       deletions: n.del
     }))
     const seen = new Set(files.map((f) => f.relPath))
-    const status = await getStatus()
+    const status = await getStatus(root)
     for (const u of status.untracked) {
       if (!seen.has(u.path)) {
         files.push({ relPath: u.path, status: 'untracked', insertions: 0, deletions: 0 })
@@ -168,9 +165,9 @@ export async function changedSince(
     return files
   }
 
-  const status = await getStatus()
+  const status = await getStatus(root)
   const map = new Map<string, DiffSinceFile>()
-  const add = (path: string, fileStatus: GitFileStatus) => {
+  const add = (path: string, fileStatus: GitFileStatus): void => {
     if (!map.has(path)) map.set(path, { relPath: path, status: fileStatus, insertions: 0, deletions: 0 })
   }
   for (const f of status.staged) add(f.path, f.status)
@@ -199,6 +196,7 @@ export async function changedSince(
 
 /** Original (baseline) and current content for a single file's diff view. */
 export async function diffFile(
+  root: string,
   base: ReviewBase,
   checkpointHash: string | null,
   relPath: string
@@ -206,13 +204,13 @@ export async function diffFile(
   const ref = base === 'checkpoint' && checkpointHash ? checkpointHash : 'HEAD'
   let original = ''
   try {
-    original = await git().show([`${ref}:${relPath}`])
+    original = await git(root).show([`${ref}:${relPath}`])
   } catch {
     original = '' // new file, or no baseline commit
   }
   let modified = ''
   try {
-    const result = await readWorkingFile(relPath)
+    const result = await readWorkingFile(root, relPath)
     modified = result.kind === 'text' ? result.content : ''
   } catch {
     modified = '' // deleted in the working tree

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { ok, err, type Err } from '@shared/result'
 import { JailViolation } from '../../services/pathJail'
+import { rootFor } from '../../services/activeRoot'
 import {
   readTree,
   readFile,
@@ -35,69 +36,69 @@ function fail(e: unknown): Err {
 }
 
 export function registerFsHandlers(reg: Registrar): void {
-  reg('fs:readTree', treeSchema, async (req) => {
+  reg('fs:readTree', treeSchema, async (req, event) => {
     try {
-      return ok(await readTree(req.relPath))
+      return ok(await readTree(rootFor(event), req.relPath))
     } catch (e) {
       return fail(e)
     }
   })
 
-  reg('fs:readFile', relSchema, async (req) => {
+  reg('fs:readFile', relSchema, async (req, event) => {
     try {
-      return ok(await readFile(req.relPath))
+      return ok(await readFile(rootFor(event), req.relPath))
     } catch (e) {
       return fail(e)
     }
   })
 
-  reg('fs:writeFile', writeSchema, async (req) => {
+  reg('fs:writeFile', writeSchema, async (req, event) => {
     try {
-      return ok(await writeFile(req.relPath, req.content, req.expectedMtimeMs))
+      return ok(await writeFile(rootFor(event), req.relPath, req.content, req.expectedMtimeMs))
     } catch (e) {
       return fail(e)
     }
   })
 
-  reg('fs:createFile', relSchema, async (req) => {
+  reg('fs:createFile', relSchema, async (req, event) => {
     try {
-      await createFile(req.relPath)
+      await createFile(rootFor(event), req.relPath)
       return ok(undefined)
     } catch (e) {
       return fail(e)
     }
   })
 
-  reg('fs:createDir', relSchema, async (req) => {
+  reg('fs:createDir', relSchema, async (req, event) => {
     try {
-      await createDir(req.relPath)
+      await createDir(rootFor(event), req.relPath)
       return ok(undefined)
     } catch (e) {
       return fail(e)
     }
   })
 
-  reg('fs:rename', renameSchema, async (req) => {
+  reg('fs:rename', renameSchema, async (req, event) => {
     try {
-      await rename(req.fromRelPath, req.toRelPath)
+      await rename(rootFor(event), req.fromRelPath, req.toRelPath)
       return ok(undefined)
     } catch (e) {
       return fail(e)
     }
   })
 
-  reg('fs:delete', relSchema, async (req) => {
+  reg('fs:delete', relSchema, async (req, event) => {
     try {
-      await trash(req.relPath)
+      await trash(rootFor(event), req.relPath)
       return ok(undefined)
     } catch (e) {
       return fail(e)
     }
   })
 
-  reg('fs:reveal', relSchema, (req) => {
+  reg('fs:reveal', relSchema, (req, event) => {
     try {
-      reveal(req.relPath)
+      reveal(rootFor(event), req.relPath)
       return ok(undefined)
     } catch (e) {
       return fail(e)

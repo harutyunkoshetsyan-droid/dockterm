@@ -1,13 +1,11 @@
 import { promises as fs } from 'node:fs'
 import { shell } from 'electron'
 import { resolveInside } from './pathJail'
-import { getProjectRoot } from './projectContext'
 import { IGNORED_ENTRIES, MAX_EDIT_FILE_BYTES, MAX_TREE_ENTRIES } from '@shared/constants'
 import type { TreeNode, ReadFileResult, WriteFileResult } from '@shared/ipc'
 
 /** One level of children for `relPath` ('' = project root). Dirs first, then files. */
-export async function readTree(relPath: string): Promise<TreeNode[]> {
-  const root = getProjectRoot()
+export async function readTree(root: string, relPath: string): Promise<TreeNode[]> {
   const abs = relPath ? resolveInside(root, relPath) : root
   const entries = await fs.readdir(abs, { withFileTypes: true })
   const nodes: TreeNode[] = []
@@ -24,8 +22,8 @@ export async function readTree(relPath: string): Promise<TreeNode[]> {
   return nodes
 }
 
-export async function readFile(relPath: string): Promise<ReadFileResult> {
-  const abs = resolveInside(getProjectRoot(), relPath)
+export async function readFile(root: string, relPath: string): Promise<ReadFileResult> {
+  const abs = resolveInside(root, relPath)
   const stat = await fs.stat(abs)
   if (stat.size > MAX_EDIT_FILE_BYTES) return { kind: 'too-large', size: stat.size }
   const buffer = await fs.readFile(abs)
@@ -34,11 +32,12 @@ export async function readFile(relPath: string): Promise<ReadFileResult> {
 }
 
 export async function writeFile(
+  root: string,
   relPath: string,
   content: string,
   expectedMtimeMs: number | null
 ): Promise<WriteFileResult> {
-  const abs = resolveInside(getProjectRoot(), relPath)
+  const abs = resolveInside(root, relPath)
   if (expectedMtimeMs !== null) {
     try {
       const stat = await fs.stat(abs)
@@ -54,27 +53,26 @@ export async function writeFile(
   return { kind: 'ok', mtimeMs: stat.mtimeMs }
 }
 
-export async function createFile(relPath: string): Promise<void> {
-  const abs = resolveInside(getProjectRoot(), relPath)
+export async function createFile(root: string, relPath: string): Promise<void> {
+  const abs = resolveInside(root, relPath)
   await fs.writeFile(abs, '', { flag: 'wx' })
 }
 
-export async function createDir(relPath: string): Promise<void> {
-  const abs = resolveInside(getProjectRoot(), relPath)
+export async function createDir(root: string, relPath: string): Promise<void> {
+  const abs = resolveInside(root, relPath)
   await fs.mkdir(abs)
 }
 
-export async function rename(fromRel: string, toRel: string): Promise<void> {
-  const root = getProjectRoot()
+export async function rename(root: string, fromRel: string, toRel: string): Promise<void> {
   await fs.rename(resolveInside(root, fromRel), resolveInside(root, toRel))
 }
 
-export async function trash(relPath: string): Promise<void> {
-  await shell.trashItem(resolveInside(getProjectRoot(), relPath))
+export async function trash(root: string, relPath: string): Promise<void> {
+  await shell.trashItem(resolveInside(root, relPath))
 }
 
-export function reveal(relPath: string): void {
-  shell.showItemInFolder(resolveInside(getProjectRoot(), relPath))
+export function reveal(root: string, relPath: string): void {
+  shell.showItemInFolder(resolveInside(root, relPath))
 }
 
 function isBinary(buffer: Buffer): boolean {

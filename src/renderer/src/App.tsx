@@ -25,6 +25,12 @@ export default function App() {
     if (themeSel) initTheme(themeSel)
   }, [themeSel, initTheme])
 
+  useEffect(() => {
+    void window.dockterm.invoke('app:getInfo', undefined).then((r) => {
+      if (r.ok) document.documentElement.dataset.platform = r.value.platform
+    })
+  }, [])
+
   return (
     <>
       {!ready ? <div className="app app--loading" /> : project ? <Shell /> : <EmptyState />}

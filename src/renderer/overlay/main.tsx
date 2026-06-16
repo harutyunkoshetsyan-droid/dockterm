@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { MunuFace } from '@renderer/components/munu/MunuFace'
+import { Munu } from '@renderer/components/munu/Munu'
 import type { MunuGlobal, MunuState } from '@shared/types'
 import { playAsk, playDone } from './sounds'
 import './overlay.css'
@@ -9,7 +9,7 @@ const LABEL: Record<MunuState, string> = {
   idle: 'resting',
   working: 'working…',
   asking: 'needs you',
-  done: 'done'
+  done: 'all done'
 }
 
 const setInteractive = (v: boolean): void => {
@@ -40,7 +40,7 @@ function Overlay() {
     return window.dockterm.on('settings:changed', (s) => setSounds(s.munu.sounds))
   }, [])
 
-  // Play a cue on entering asking / done.
+  // Cue on entering asking / done (the "whole work finished" chime).
   useEffect(() => {
     if (g.state !== prev.current) {
       if (sounds && g.state === 'asking') playAsk()
@@ -51,23 +51,30 @@ function Overlay() {
 
   const asking = g.state === 'asking'
   const ask = g.asks[0]
+  const showCard = asking && !!ask?.binary // only true yes/no gets one-click buttons
 
   return (
     <div className={`ov ov--${platform}`}>
       <div
-        className={`island island--${g.state}${asking ? ' island--open' : ''}`}
+        className={`island island--${g.state}${showCard ? ' island--open' : ''}`}
         onMouseEnter={() => setInteractive(true)}
         onMouseLeave={() => setInteractive(false)}
-        onClick={() => !asking && focus()}
+        onClick={() => {
+          if (!showCard) focus()
+        }}
         title="munu"
       >
         <div className="island__row">
-          <MunuFace state={g.state} size={26} />
-          <span className="island__label">{LABEL[g.state]}</span>
+          <Munu state={g.state} size={30} />
+          {g.state !== 'idle' && (
+            <span className="island__label">
+              {asking && !showCard ? 'needs you · open' : LABEL[g.state]}
+            </span>
+          )}
         </div>
-        {asking && (
+        {showCard && (
           <div className="island__card">
-            {ask?.command && <pre className="island__cmd">{ask.command}</pre>}
+            {ask?.title && <div className="island__title">{ask.title}</div>}
             <div className="island__actions">
               <button
                 className="ob ob--yes"

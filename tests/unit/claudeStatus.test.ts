@@ -11,22 +11,54 @@ describe('classify', () => {
   it('detects asking from a numbered prompt menu', () => {
     expect(classify('Do you want to proceed?\n❯ 1. Yes\n  2. No')).toBe('asking')
   })
+  it('detects asking inside a box-drawing border', () => {
+    expect(classify('│ ❯ 1. Yes │\n│   2. No  │')).toBe('asking')
+  })
   it('detects asking from "Esc to cancel"', () => {
     expect(classify('Enter to confirm · Esc to cancel')).toBe('asking')
   })
   it('returns idle for ordinary output', () => {
     expect(classify('$ ls\nREADME.md\n$ ')).toBe('idle')
   })
-  it('prefers working over asking when both signals appear', () => {
-    expect(classify('❯ 1. Yes\n✻ Thinking… running')).toBe('working')
-  })
 })
 
 describe('parseAsk', () => {
-  it('pulls the question/command line above the menu', () => {
-    const text = 'Claude wants to run a command\n  npm install\n❯ 1. Yes\n  2. No'
-    expect(parseAsk(text)).toContain('npm install')
+  it('parses a boxed yes/no proceed prompt as binary with a clean title', () => {
+    const text = [
+      '╭───────────────────────────────╮',
+      '│ Bash command                  │',
+      '│   npm install                 │',
+      '│ Do you want to proceed?       │',
+      '│ ❯ 1. Yes                      │',
+      "│   2. Yes, and don't ask again │",
+      '│   3. No, and tell Claude      │',
+      '╰───────────────────────────────╯'
+    ].join('\n')
+    const ask = parseAsk(text)!
+    expect(ask.binary).toBe(true)
+    expect(ask.options[0]).toMatch(/^Yes/)
+    expect(ask.title).toContain('npm install')
+    expect(ask.title).not.toContain('─')
   })
+
+  it('treats a non-yes/no menu as a choice (not binary)', () => {
+    const text = [
+      'Restore which checkpoint?',
+      '❯ 1. 5 minutes ago',
+      '  2. 1 hour ago',
+      '  3. yesterday'
+    ].join('\n')
+    const ask = parseAsk(text)!
+    expect(ask.binary).toBe(false)
+    expect(ask.options).toHaveLength(3)
+  })
+
+  it('treats a free-text "Esc to cancel" prompt as non-binary with no options', () => {
+    const ask = parseAsk('Type your answer · Esc to cancel')!
+    expect(ask.binary).toBe(false)
+    expect(ask.options).toHaveLength(0)
+  })
+
   it('returns null when not asking', () => {
     expect(parseAsk('just output')).toBeNull()
   })

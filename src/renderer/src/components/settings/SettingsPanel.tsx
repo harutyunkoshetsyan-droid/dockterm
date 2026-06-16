@@ -57,6 +57,7 @@ export function SettingsPanel() {
   const setEditor = (patch: Partial<Settings['editor']>) =>
     void update({ editor: { ...s.editor, ...patch } })
   const setGit = (patch: Partial<Settings['git']>) => void update({ git: { ...s.git, ...patch } })
+  const setMunu = (patch: Partial<Settings['munu']>) => void update({ munu: { ...s.munu, ...patch } })
 
   const resetDefaults = () => {
     selectTheme('dockterm-dark')
@@ -212,6 +213,31 @@ export function SettingsPanel() {
               onChange={(e) => setEditor({ fontSize: clampNum(e.target.value, 8, 32, 13) })}
             />
           </Field>
+        </Section>
+
+        <Section title="munu">
+          <Field label="Enable munu">
+            <Toggle checked={s.munu.enabled} onChange={(v) => setMunu({ enabled: v })} />
+          </Field>
+          <Field label="Floating overlay (notch / pill)">
+            <Toggle checked={s.munu.overlay} onChange={(v) => setMunu({ overlay: v })} />
+          </Field>
+          <Field label="Sounds">
+            <Toggle checked={s.munu.sounds} onChange={(v) => setMunu({ sounds: v })} />
+          </Field>
+          <Field label="Attention animation">
+            <Toggle checked={s.munu.attention} onChange={(v) => setMunu({ attention: v })} />
+          </Field>
+          <Field label="Keep awake while Claude works">
+            <Toggle checked={s.munu.keepAwake} onChange={(v) => setMunu({ keepAwake: v })} />
+          </Field>
+          <Field label="Notify when backgrounded">
+            <Toggle checked={s.munu.notifications} onChange={(v) => setMunu({ notifications: v })} />
+          </Field>
+          <div className="settings-note">
+            munu mirrors what Claude Code is doing. The floating pill stays visible over other
+            apps and shows <code>[y/n]</code> when Claude needs you — it never auto-answers.
+          </div>
         </Section>
 
         <Section title="Git">

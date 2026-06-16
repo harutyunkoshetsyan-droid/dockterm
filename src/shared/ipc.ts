@@ -26,7 +26,8 @@ import type {
   McpReadResult,
   SkillsReadResult,
   SkillTemplate,
-  ProjectInfoData
+  ProjectInfoData,
+  MunuGlobal
 } from './types'
 
 export interface AppInfo {
@@ -142,7 +143,7 @@ export interface GitOutput {
 /* -------------------------------- settings -------------------------------- */
 
 export type SettingsPatch = Partial<
-  Pick<Settings, 'terminal' | 'editor' | 'ui' | 'git' | 'claude' | 'workspace' | 'theme'>
+  Pick<Settings, 'terminal' | 'editor' | 'ui' | 'git' | 'claude' | 'munu' | 'workspace' | 'theme'>
 >
 
 /* ------------------------------- channel maps ----------------------------- */
@@ -210,6 +211,12 @@ export interface InvokeChannels {
   'window:isPrimary': (req: void) => Result<boolean>
   'app:recover': (req: { hard: boolean }) => Result<void>
   'ui:setZoom': (req: { factor: number }) => Result<{ zoom: number }>
+
+  // munu — each window reports its aggregate; the overlay drives answers/focus.
+  'munu:report': (req: MunuGlobal) => Result<void>
+  'munu:answer': (req: { key: 'enter' | 'esc' }) => Result<void>
+  'munu:focus': (req: void) => Result<void>
+  'munu:setInteractive': (req: { interactive: boolean }) => Result<void>
 }
 
 export interface EventChannels {
@@ -217,6 +224,12 @@ export interface EventChannels {
   'pty:exit': PtyExitEvent
   'settings:changed': Settings
   'fs:watch': WatchBatch
+  /** main → overlay window: the global munu state. */
+  'munu:state': MunuGlobal
+  /** main → the window owning an asking pane: inject the answer key. */
+  'munu:doAnswer': { leafId: string; key: 'enter' | 'esc' }
+  /** main → the window owning an asking pane: focus that pane. */
+  'munu:doFocus': { tabId: string; leafId: string }
 }
 
 export type InvokeChannel = keyof InvokeChannels
@@ -275,7 +288,11 @@ export const INVOKE_CHANNELS: readonly InvokeChannel[] = [
   'window:new',
   'window:isPrimary',
   'app:recover',
-  'ui:setZoom'
+  'ui:setZoom',
+  'munu:report',
+  'munu:answer',
+  'munu:focus',
+  'munu:setInteractive'
 ]
 
 /** Runtime allowlist mirrored from `EventChannels`. */
@@ -283,7 +300,10 @@ export const EVENT_CHANNELS: readonly EventName[] = [
   'pty:data',
   'pty:exit',
   'settings:changed',
-  'fs:watch'
+  'fs:watch',
+  'munu:state',
+  'munu:doAnswer',
+  'munu:doFocus'
 ]
 
 export interface DockTermApi {

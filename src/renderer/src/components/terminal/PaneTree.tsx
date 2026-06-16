@@ -4,6 +4,7 @@ import { SplitSquareHorizontal, SplitSquareVertical, X } from 'lucide-react'
 import { useAppStore } from '../../state/useAppStore'
 import { useWorkspaceStore } from '../../state/useWorkspaceStore'
 import { useMunuStore } from '../../state/useMunuStore'
+import { paneWriters } from '../../state/paneWriters'
 import type { LayoutNode, LeafNode } from '../../state/layout'
 import { TerminalView } from './TerminalView'
 
@@ -36,8 +37,14 @@ function TerminalPane({
   const pasteRef = useRef<(text: string) => void>(() => {})
   const [dragOver, setDragOver] = useState(false)
 
-  // Drop this pane's Claude-state when it unmounts (closed/retargeted).
-  useEffect(() => () => useMunuStore.getState().removePane(leaf.id), [leaf.id])
+  // Drop this pane's Claude-state + writer when it unmounts (closed/retargeted).
+  useEffect(
+    () => () => {
+      useMunuStore.getState().removePane(leaf.id)
+      paneWriters.unregister(leaf.id)
+    },
+    [leaf.id]
+  )
 
   const act = (fn: () => void) => (e: MouseEvent) => {
     e.stopPropagation()
@@ -122,9 +129,12 @@ function TerminalPane({
           kind="main"
           cwd={leaf.cwd}
           active={focused}
-          onPasteReady={(p) => (pasteRef.current = p)}
+          onPasteReady={(p) => {
+            pasteRef.current = p
+            paneWriters.register(leaf.id, p)
+          }}
           onCwd={(cwd) => useWorkspaceStore.getState().setPaneCwd(leaf.id, cwd)}
-          onStatus={(state, ask) => useMunuStore.getState().setPaneStatus(leaf.id, state, ask)}
+          onStatus={(state, ask) => useMunuStore.getState().setPaneStatus(leaf.id, tabId, state, ask)}
           onActivity={() => markActivity(tabId)}
           fontFamily={t?.fontFamily ?? undefined}
           fontSize={t?.fontSize}

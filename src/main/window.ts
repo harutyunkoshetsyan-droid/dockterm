@@ -6,6 +6,8 @@ import { killPtysForWindow } from './services/ptyService'
 import { stopWatchingById } from './services/watcherService'
 import { clearActiveRoot } from './services/activeRoot'
 import { getSettings } from './services/settingsService'
+import { dropWindowMunu } from './services/munuService'
+import { destroyOverlay } from './overlayWindow'
 
 const openWindows = new Set<number>()
 let primaryId: number | null = null
@@ -53,7 +55,11 @@ export function createWindow(): BrowserWindow {
     killPtysForWindow(id)
     stopWatchingById(id)
     clearActiveRoot(id)
+    dropWindowMunu(id)
     if (primaryId === id) primaryId = openWindows.values().next().value ?? null
+    // No main windows left → close the floating overlay so the app can quit
+    // (the overlay is otherwise an always-open window).
+    if (openWindows.size === 0) destroyOverlay()
   })
 
   // Apply the saved UI zoom on every (re)load — setZoomFactor resets on reload.

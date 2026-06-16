@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useAppStore } from './state/useAppStore'
 import { useThemeStore } from './state/useThemeStore'
 import { useShortcuts } from './hooks/useShortcuts'
+import { useMunuBridge } from './components/munu/useMunuBridge'
 import { Shell } from './components/layout/Shell'
 import { EmptyState } from './components/common/EmptyState'
 import { Toaster } from './components/common/Toaster'
@@ -16,6 +17,7 @@ export default function App() {
   const init = useAppStore((s) => s.init)
 
   useShortcuts()
+  useMunuBridge()
 
   useEffect(() => {
     void init()

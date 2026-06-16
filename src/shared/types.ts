@@ -2,6 +2,28 @@
 
 export type PanelId = 'files' | 'git' | 'review' | 'mcp' | 'skills' | 'info' | 'settings'
 
+/** munu (the mascot) state, aggregated across panes/windows. */
+export type MunuState = 'idle' | 'working' | 'asking' | 'done'
+/** A pane that is waiting for the user's permission. */
+export interface MunuAsk {
+  leafId: string
+  tabId: string
+  /** the command/question parsed from the buffer, if any */
+  command: string | null
+}
+export interface MunuGlobal {
+  state: MunuState
+  asks: MunuAsk[]
+}
+export type MunuSettings = {
+  enabled: boolean
+  overlay: boolean
+  sounds: boolean
+  attention: boolean
+  keepAwake: boolean
+  notifications: boolean
+}
+
 export type AccentName = 'violet' | 'blue' | 'teal'
 export type TerminalRenderer = 'auto' | 'dom'
 export type CursorStyle = 'block' | 'underline' | 'bar'
@@ -75,6 +97,7 @@ export interface Settings {
   claude: ClaudeSettings
   /** Selected theme id, or 'auto' to follow the OS appearance. */
   theme: string
+  munu: MunuSettings
   workspace: WorkspacePersist | null
   /** Keyed by project path. */
   checkpoints: Record<string, Checkpoint>

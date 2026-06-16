@@ -7,6 +7,9 @@ const SCHEME = 'app'
 /** URL the production window loads. */
 export const APP_URL = `${SCHEME}://bundle/index.html`
 
+/** URL the production munu overlay window loads. */
+export const OVERLAY_URL = `${SCHEME}://bundle/overlay.html`
+
 /**
  * Must run before `app` is ready. Registers `app://` as a standard, secure scheme
  * so the renderer behaves like an https origin (enables CSP, fetch, workers) while

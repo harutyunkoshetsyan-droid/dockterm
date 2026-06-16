@@ -533,6 +533,48 @@
   color: var(--text);
 }
 
+/* --------------------- macOS vibrancy + title bar ------------------------ */
+/* Drag the window by the top bar (hidden-inset title bar); keep controls clickable. */
+.topbar {
+  -webkit-app-region: drag;
+}
+.topbar button,
+.topbar a,
+.topbar input,
+.topbar select,
+.topbar [role='button'] {
+  -webkit-app-region: no-drag;
+}
+:root[data-platform='darwin'] .topbar {
+  padding-left: 82px;
+}
+/* Let the window vibrancy show through translucent chrome (terminals/editor stay opaque). */
+:root[data-platform='darwin'] body,
+:root[data-platform='darwin'] .app {
+  background: transparent;
+}
+:root[data-platform='darwin'] .topbar,
+:root[data-platform='darwin'] .tabstrip,
+:root[data-platform='darwin'] .panel,
+:root[data-platform='darwin'] .pane__bar {
+  background-color: color-mix(in srgb, var(--panel) 72%, transparent);
+}
+
+/* ------------------------------- Motion ---------------------------------- */
+@keyframes dt-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.dock-wrap {
+  animation: dt-slide-in 0.16s var(--ease);
+}
+
 /* --------------------------- Resizable panels ---------------------------- */
 .vsplit,
 .hsplit {

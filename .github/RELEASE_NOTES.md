@@ -3,11 +3,11 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🪄 What's new in v0.8.0 — munu floats free
+## ✨ What's new in v0.9.0 — munu comes alive
 
-- **munu now lives above everything.** A little always-on-top pill sits at the top of your screen — over the **notch** on a MacBook — and mirrors what Claude Code is doing across *all* your windows and panes. Watching YouTube fullscreen while Claude works? You'll still see munu flip to **done** or **needs you**.
-- **One-click approve / deny.** When Claude pauses for permission, munu's pill expands to show the command with **[y] yes / [n] no / open** — answer right there (or jump to the terminal). It never auto-answers; the choice is always yours.
-- **Thoughtful touches:** gentle sound cues, an attention glow when Claude needs you, keeps your Mac awake while Claude is working, and a desktop notification if DockTerm is in the background. All toggleable in **Settings → munu**.
+- **munu is fully animated now** — it floats and blinks while resting, bobs while Claude works, perks up with an amber glow when it needs you, and does a happy little hop with a cute **"all done ✨"** chime when the whole job finishes. Visible everywhere: the floating pill (over the notch on Mac), the top bar, and the dock icon.
+- **Smarter permission pop-up.** The floating card is cleaner — it now shows the *actual* command (no more raw box-drawing) and only offers one-click **[y] yes / [n] no** for true yes/no prompts. For other menus (like "restore a checkpoint"), it simply says **needs you · open** and takes you to the terminal to choose — so it never sends the wrong answer.
+- Prettier overlay, gentler sounds, and a calmer idle look.
 
 ---
 

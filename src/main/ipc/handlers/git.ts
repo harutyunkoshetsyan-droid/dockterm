@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { ok, err, type Err } from '@shared/result'
 import * as gitService from '../../services/gitService'
+import { rootFor } from '../../services/activeRoot'
 import type { Registrar } from '../register'
 
 const pathsSchema = z.object({ paths: z.array(z.string().max(4096)).max(5000) })
@@ -45,103 +46,103 @@ function mapGitError(e: unknown): Err {
 }
 
 export function registerGitHandlers(reg: Registrar): void {
-  reg('git:status', z.void(), async () => {
+  reg('git:status', z.void(), async (_req, event) => {
     try {
-      return ok(await gitService.getStatus())
+      return ok(await gitService.getStatus(rootFor(event)))
     } catch (e) {
       return mapGitError(e)
     }
   })
 
-  reg('git:stage', pathsSchema, async (req) => {
+  reg('git:stage', pathsSchema, async (req, event) => {
     try {
-      await gitService.stage(req.paths)
+      await gitService.stage(rootFor(event), req.paths)
       return ok(undefined)
     } catch (e) {
       return mapGitError(e)
     }
   })
 
-  reg('git:stageAll', z.void(), async () => {
+  reg('git:stageAll', z.void(), async (_req, event) => {
     try {
-      await gitService.stageAll()
+      await gitService.stageAll(rootFor(event))
       return ok(undefined)
     } catch (e) {
       return mapGitError(e)
     }
   })
 
-  reg('git:unstage', pathsSchema, async (req) => {
+  reg('git:unstage', pathsSchema, async (req, event) => {
     try {
-      await gitService.unstage(req.paths)
+      await gitService.unstage(rootFor(event), req.paths)
       return ok(undefined)
     } catch (e) {
       return mapGitError(e)
     }
   })
 
-  reg('git:discard', pathsSchema, async (req) => {
+  reg('git:discard', pathsSchema, async (req, event) => {
     try {
-      await gitService.discard(req.paths)
+      await gitService.discard(rootFor(event), req.paths)
       return ok(undefined)
     } catch (e) {
       return mapGitError(e)
     }
   })
 
-  reg('git:commit', commitSchema, async (req) => {
+  reg('git:commit', commitSchema, async (req, event) => {
     try {
-      return ok(await gitService.commit(req.message))
+      return ok(await gitService.commit(rootFor(event), req.message))
     } catch (e) {
       return mapGitError(e)
     }
   })
 
-  reg('git:push', pushSchema, async (req) => {
+  reg('git:push', pushSchema, async (req, event) => {
     try {
-      return ok({ output: await gitService.push(req) })
+      return ok({ output: await gitService.push(rootFor(event), req) })
     } catch (e) {
       return mapGitError(e)
     }
   })
 
-  reg('git:pull', z.void(), async () => {
+  reg('git:pull', z.void(), async (_req, event) => {
     try {
-      return ok({ output: await gitService.pull() })
+      return ok({ output: await gitService.pull(rootFor(event)) })
     } catch (e) {
       return mapGitError(e)
     }
   })
 
-  reg('git:branches', z.void(), async () => {
+  reg('git:branches', z.void(), async (_req, event) => {
     try {
-      return ok(await gitService.branches())
+      return ok(await gitService.branches(rootFor(event)))
     } catch (e) {
       return mapGitError(e)
     }
   })
 
-  reg('git:createBranch', branchSchema, async (req) => {
+  reg('git:createBranch', branchSchema, async (req, event) => {
     try {
-      await gitService.createBranch(req.name)
+      await gitService.createBranch(rootFor(event), req.name)
       return ok(undefined)
     } catch (e) {
       return mapGitError(e)
     }
   })
 
-  reg('git:switchBranch', branchSchema, async (req) => {
+  reg('git:switchBranch', branchSchema, async (req, event) => {
     try {
-      await gitService.switchBranch(req.name)
+      await gitService.switchBranch(rootFor(event), req.name)
       return ok(undefined)
     } catch (e) {
       return mapGitError(e)
     }
   })
 
-  reg('git:deleteBranch', branchSchema, async (req) => {
+  reg('git:deleteBranch', branchSchema, async (req, event) => {
     try {
-      await gitService.deleteBranch(req.name)
+      await gitService.deleteBranch(rootFor(event), req.name)
       return ok(undefined)
     } catch (e) {
       return mapGitError(e)

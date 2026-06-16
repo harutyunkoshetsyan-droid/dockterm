@@ -1,7 +1,6 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 import { homedir } from 'node:os'
-import { getProjectRoot } from './projectContext'
 import type { SkillView, CommandView, SkillsReadResult, SkillTemplate } from '@shared/types'
 
 function parseFrontmatter(text: string): { fm: Record<string, string>; body: string } {
@@ -30,11 +29,11 @@ function describe(fm: Record<string, string>, body: string): string {
   return ''
 }
 
-function toRel(file: string): string {
-  return relative(getProjectRoot(), file).split(sep).join('/')
+function toRel(root: string, file: string): string {
+  return relative(root, file).split(sep).join('/')
 }
 
-function readSkillsDir(dir: string, scope: 'project' | 'user'): SkillView[] {
+function readSkillsDir(root: string, dir: string, scope: 'project' | 'user'): SkillView[] {
   if (!existsSync(dir)) return []
   const out: SkillView[] = []
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -46,7 +45,7 @@ function readSkillsDir(dir: string, scope: 'project' | 'user'): SkillView[] {
       slashName: fm.name || entry.name,
       description: describe(fm, body),
       scope,
-      sourcePath: scope === 'project' ? toRel(skillMd) : skillMd,
+      sourcePath: scope === 'project' ? toRel(root, skillMd) : skillMd,
       canOpen: scope === 'project',
       disableModelInvocation: /^true$/i.test(fm['disable-model-invocation'] ?? '')
     })
@@ -54,7 +53,7 @@ function readSkillsDir(dir: string, scope: 'project' | 'user'): SkillView[] {
   return out
 }
 
-function readCommandsDir(dir: string, scope: 'project' | 'user'): CommandView[] {
+function readCommandsDir(root: string, dir: string, scope: 'project' | 'user'): CommandView[] {
   if (!existsSync(dir)) return []
   const out: CommandView[] = []
   const walk = (current: string, prefix: string): void => {
@@ -69,7 +68,7 @@ function readCommandsDir(dir: string, scope: 'project' | 'user'): CommandView[] 
           slashName: prefix ? `${prefix}:${base}` : base,
           description: describe(fm, body),
           scope,
-          sourcePath: scope === 'project' ? toRel(file) : file,
+          sourcePath: scope === 'project' ? toRel(root, file) : file,
           canOpen: scope === 'project'
         })
       }
@@ -79,14 +78,13 @@ function readCommandsDir(dir: string, scope: 'project' | 'user'): CommandView[] 
   return out
 }
 
-export function readSkills(includeUser: boolean): SkillsReadResult {
-  const root = getProjectRoot()
-  const skills = readSkillsDir(join(root, '.claude', 'skills'), 'project')
-  const commands = readCommandsDir(join(root, '.claude', 'commands'), 'project')
+export function readSkills(root: string, includeUser: boolean): SkillsReadResult {
+  const skills = readSkillsDir(root, join(root, '.claude', 'skills'), 'project')
+  const commands = readCommandsDir(root, join(root, '.claude', 'commands'), 'project')
   if (includeUser) {
     const userClaude = join(homedir(), '.claude')
-    skills.push(...readSkillsDir(join(userClaude, 'skills'), 'user'))
-    commands.push(...readCommandsDir(join(userClaude, 'commands'), 'user'))
+    skills.push(...readSkillsDir(root, join(userClaude, 'skills'), 'user'))
+    commands.push(...readCommandsDir(root, join(userClaude, 'commands'), 'user'))
   }
   skills.sort((a, b) => a.slashName.localeCompare(b.slashName))
   commands.sort((a, b) => a.slashName.localeCompare(b.slashName))
@@ -171,8 +169,12 @@ When the user runs /${name}, do the following:
 `
 }
 
-export function createSkill(name: string, kind: 'skill' | 'command', template: SkillTemplate): string {
-  const root = getProjectRoot()
+export function createSkill(
+  root: string,
+  name: string,
+  kind: 'skill' | 'command',
+  template: SkillTemplate
+): string {
   const safe = name
     .trim()
     .replace(/[^a-zA-Z0-9_-]/g, '-')
@@ -186,7 +188,7 @@ export function createSkill(name: string, kind: 'skill' | 'command', template: S
     const file = join(dir, `${safe}.md`)
     if (existsSync(file)) throw new Error('A command with that name already exists')
     writeFileSync(file, commandTemplate(safe), { flag: 'wx' })
-    return toRel(file)
+    return toRel(root, file)
   }
 
   const dir = join(root, '.claude', 'skills', safe)
@@ -194,5 +196,5 @@ export function createSkill(name: string, kind: 'skill' | 'command', template: S
   if (existsSync(file)) throw new Error('A skill with that name already exists')
   mkdirSync(dir, { recursive: true })
   writeFileSync(file, SKILL_TEMPLATES[template](safe), { flag: 'wx' })
-  return toRel(file)
+  return toRel(root, file)
 }

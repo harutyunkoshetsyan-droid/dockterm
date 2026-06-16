@@ -2,7 +2,6 @@ import { execFile } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { promisify } from 'node:util'
-import { getProjectRoot } from './projectContext'
 import type { ProjectInfoData, ProjectScript } from '@shared/types'
 
 const run = promisify(execFile)
@@ -33,8 +32,7 @@ function detectFrameworks(deps: Record<string, unknown>): string[] {
   return out
 }
 
-export async function getProjectInfo(): Promise<ProjectInfoData> {
-  const root = getProjectRoot()
+export async function getProjectInfo(root: string): Promise<ProjectInfoData> {
   const pkgPath = join(root, 'package.json')
 
   let name: string | null = null

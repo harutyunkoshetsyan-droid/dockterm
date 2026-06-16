@@ -9,7 +9,6 @@ import {
   clearLastProjectIfMatches
 } from '../../services/settingsService'
 import { startWatching } from '../../services/watcherService'
-import { setProjectRoot } from '../../services/projectContext'
 import { setActiveRoot } from '../../services/activeRoot'
 import type { Registrar } from '../register'
 
@@ -30,7 +29,7 @@ export function registerProjectHandlers(reg: Registrar): void {
   reg('project:open', pathSchema, async (req, event) => {
     try {
       const info = await inspectProject(req.path)
-      setProjectRoot(info.path)
+      setActiveRoot(event.sender.id, info.path)
       addRecentProject({ path: info.path, name: info.name, lastOpenedAt: Date.now() })
       const win = BrowserWindow.fromWebContents(event.sender)
       if (win) startWatching(info.path, win)

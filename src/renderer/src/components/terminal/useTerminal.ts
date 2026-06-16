@@ -9,6 +9,7 @@ import type { PtyDataEvent } from '@shared/ipc'
 import { DEFAULT_MONO } from './terminalTheme'
 import { parseOsc7 } from './osc7'
 import { classify, parseAsk, type ClaudeState } from './claudeStatus'
+import type { AskInfo } from '@shared/types'
 import { useThemeStore } from '../../state/useThemeStore'
 import '@xterm/xterm/css/xterm.css'
 
@@ -30,7 +31,7 @@ export interface TerminalOptions {
   /** Called with the shell's live working directory (from OSC 7), when reported. */
   onCwd?: (cwd: string) => void
   /** Reports the pane's inferred Claude state from the rendered buffer. */
-  onStatus?: (state: ClaudeState, ask: string | null) => void
+  onStatus?: (state: ClaudeState, ask: AskInfo | null) => void
 }
 
 export interface TerminalHandle {

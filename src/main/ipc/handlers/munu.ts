@@ -6,7 +6,9 @@ import type { Registrar } from '../register'
 const askSchema = z.object({
   leafId: z.string(),
   tabId: z.string(),
-  command: z.string().nullable()
+  title: z.string().nullable(),
+  options: z.array(z.string()).max(16),
+  binary: z.boolean()
 })
 const reportSchema = z.object({
   state: z.enum(['idle', 'working', 'asking', 'done']),

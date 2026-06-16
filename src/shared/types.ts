@@ -4,12 +4,19 @@ export type PanelId = 'files' | 'git' | 'review' | 'mcp' | 'skills' | 'info' | '
 
 /** munu (the mascot) state, aggregated across panes/windows. */
 export type MunuState = 'idle' | 'working' | 'asking' | 'done'
+/** A parsed Claude permission prompt. */
+export interface AskInfo {
+  /** cleaned question/command context (box-drawing stripped), if any */
+  title: string | null
+  /** the menu option labels, in order (without the numbers) */
+  options: string[]
+  /** true only for a clear Yes/No confirm — the only case we offer [y]/[n] */
+  binary: boolean
+}
 /** A pane that is waiting for the user's permission. */
-export interface MunuAsk {
+export interface MunuAsk extends AskInfo {
   leafId: string
   tabId: string
-  /** the command/question parsed from the buffer, if any */
-  command: string | null
 }
 export interface MunuGlobal {
   state: MunuState

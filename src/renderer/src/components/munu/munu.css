@@ -1,0 +1,60 @@
+/* Live munu: the SVGs animate themselves (SMIL); we add character with motion. */
+.munu {
+  display: inline-block;
+  line-height: 0;
+  will-change: transform;
+  transform-origin: center bottom;
+}
+.munu svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.munu--idle {
+  animation: munu-float 4.5s ease-in-out infinite;
+}
+.munu--working {
+  animation: munu-bob 1.3s ease-in-out infinite;
+}
+.munu--asking {
+  animation: munu-attn 0.85s ease-in-out infinite;
+}
+.munu--done {
+  animation: munu-hop 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.munu--sleeping {
+  animation: munu-sleep 5s ease-in-out infinite;
+  opacity: 0.85;
+}
+
+@keyframes munu-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1.5px); }
+}
+@keyframes munu-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-1px) rotate(-2.5deg); }
+  75% { transform: translateY(-1px) rotate(2.5deg); }
+}
+@keyframes munu-attn {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.07) translateY(-1px); }
+}
+@keyframes munu-hop {
+  0% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-6px) scale(1.1); }
+  55% { transform: translateY(0) scale(0.96); }
+  75% { transform: translateY(-2px) scale(1.02); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes munu-sleep {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(1.5px) rotate(1deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .munu {
+    animation: none !important;
+  }
+}

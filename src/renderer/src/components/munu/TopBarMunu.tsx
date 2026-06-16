@@ -1,7 +1,7 @@
 import { useMunuStore } from '../../state/useMunuStore'
 import { useAppStore } from '../../state/useAppStore'
 import { useWorkspaceStore } from '../../state/useWorkspaceStore'
-import { MunuFace } from './MunuFace'
+import { Munu } from './Munu'
 
 const LABEL: Record<string, string> = {
   idle: 'resting',
@@ -29,7 +29,7 @@ export function TopBarMunu() {
 
   return (
     <button className={cls} title={`munu · ${label}`} onClick={jumpToAsking}>
-      <MunuFace state={state} hasProject={hasProject} size={22} />
+      <Munu state={state} sleeping={!hasProject} size={24} />
     </button>
   )
 }

@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 import { aggregate, type MunuState } from './munuAggregate'
 import type { ClaudeState } from '../components/terminal/claudeStatus'
-import type { MunuAsk, MunuGlobal } from '@shared/types'
+import type { AskInfo, MunuAsk, MunuGlobal } from '@shared/types'
 
 interface PaneStatus {
   state: ClaudeState
-  ask: string | null
+  ask: AskInfo | null
   tabId: string
 }
 
@@ -13,7 +13,7 @@ interface MunuStore {
   panes: Record<string, PaneStatus>
   /** transient 'done' flags per leaf, set when working→idle settles */
   done: Record<string, boolean>
-  setPaneStatus: (leafId: string, tabId: string, state: ClaudeState, ask: string | null) => void
+  setPaneStatus: (leafId: string, tabId: string, state: ClaudeState, ask: AskInfo | null) => void
   removePane: (leafId: string) => void
   munuState: () => MunuState
   /** This window's aggregate + asking panes, for reporting to main. */
@@ -71,7 +71,13 @@ export const useMunuStore = create<MunuStore>((set, get) => ({
     const { panes } = get()
     const asks: MunuAsk[] = Object.entries(panes)
       .filter(([, p]) => p.state === 'asking')
-      .map(([leafId, p]) => ({ leafId, tabId: p.tabId, command: p.ask }))
+      .map(([leafId, p]) => ({
+        leafId,
+        tabId: p.tabId,
+        title: p.ask?.title ?? null,
+        options: p.ask?.options ?? [],
+        binary: p.ask?.binary ?? false
+      }))
     return { state: get().munuState(), asks }
   }
 }))

@@ -3,12 +3,11 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v0.20.0 — munu truly floats over fullscreen
+## 🎯 What's new in v0.21.0 — a calmer, less-repetitive header
 
-- **Visible over another app's fullscreen Space (macOS).** This is the real fix: the overlay is now a macOS **panel window** (the same non-activating NSPanel trick native notch apps use), so munu floats over fullscreened apps on other desktops — not just regular windows. Also removes the launch flicker.
-- **Instant state on answer.** Clicking Yes / Submit / a choice closes the card and updates munu **immediately** (no more ~2s lag waiting for the old menu to scroll out of the buffer).
-- **Dock shows the right project.** Folders without their own `.git` no longer collapse up to your home directory (a `.git` in `$HOME` was claiming them).
-- Plus everything from v0.18.0: bigger/fully-visible card, robust multi-select, and the "Type something" text field.
+- **No more triple-printed folder name.** The project name used to appear three times stacked above the terminal (top bar, tab, *and* the pane bar). Now it shows once — in the tab. The top bar keeps the open-project button, branch, and change-count; the per-pane title bar only appears when a tab actually has **2+ panes** (where it's useful).
+- **More terminal, less chrome.** A single-pane tab drops the per-pane bar entirely, reclaiming a row of vertical space.
+- Plus everything from v0.20.0: munu floats over fullscreen, instant state on answer, and the correct project in the dock.
 
 ---
 

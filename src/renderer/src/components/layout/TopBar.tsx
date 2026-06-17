@@ -21,12 +21,12 @@ export function TopBar() {
     <header className="topbar">
       <div className="topbar__left">
         <button
-          className="topbar__project"
+          className="iconbtn"
           onClick={() => void openDialog()}
           title="Open another project"
+          aria-label="Open another project"
         >
-          <FolderOpen size={13} />
-          <span>{project?.name ?? 'DockTerm'}</span>
+          <FolderOpen size={15} />
         </button>
         {project?.branch && (
           <span className="topbar__branch">

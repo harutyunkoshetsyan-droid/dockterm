@@ -22,12 +22,15 @@ function TerminalPane({
   leaf,
   tabId,
   focused,
-  canClose
+  canClose,
+  hideBar
 }: {
   leaf: LeafNode
   tabId: string
   focused: boolean
   canClose: boolean
+  /** Single-pane tab: skip the per-pane title bar (the tab already names it). */
+  hideBar: boolean
 }) {
   const t = useAppStore((s) => s.settings?.terminal)
   const focusPane = useWorkspaceStore((s) => s.focusPane)
@@ -97,28 +100,30 @@ function TerminalPane({
 
   return (
     <div
-      className={`pane${focused ? ' pane--focused' : ''}${dragOver ? ' pane--drop' : ''}`}
+      className={`pane${focused && !hideBar ? ' pane--focused' : ''}${dragOver ? ' pane--drop' : ''}`}
       onMouseDown={() => focusPane(tabId, leaf.id)}
       onDragOver={onDragOver}
       onDragLeave={() => setDragOver(false)}
       onDrop={onDrop}
     >
-      <div className="pane__bar">
-        <span className="pane__title">{leaf.title}</span>
-        <div className="pane__actions">
-          <button title="Split right" onMouseDown={act(() => split('row'))}>
-            <SplitSquareHorizontal size={12} />
-          </button>
-          <button title="Split down" onMouseDown={act(() => split('col'))}>
-            <SplitSquareVertical size={12} />
-          </button>
-          {canClose && (
-            <button title="Close pane" onMouseDown={act(() => closeFocused())}>
-              <X size={12} />
+      {!hideBar && (
+        <div className="pane__bar">
+          <span className="pane__title">{leaf.title}</span>
+          <div className="pane__actions">
+            <button title="Split right" onMouseDown={act(() => split('row'))}>
+              <SplitSquareHorizontal size={12} />
             </button>
-          )}
+            <button title="Split down" onMouseDown={act(() => split('col'))}>
+              <SplitSquareVertical size={12} />
+            </button>
+            {canClose && (
+              <button title="Close pane" onMouseDown={act(() => closeFocused())}>
+                <X size={12} />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
       <div className="pane__term">
         <TerminalView
           key={`${leaf.id}:${leaf.cwd}`}
@@ -164,13 +169,16 @@ export function PaneTree({
   tabId,
   focusedLeafId,
   tabActive,
-  canClose
+  canClose,
+  depth = 0
 }: {
   node: LayoutNode
   tabId: string
   focusedLeafId: string
   tabActive: boolean
   canClose: boolean
+  /** Tree depth; a leaf at depth 0 is the tab's only pane (so it needs no bar). */
+  depth?: number
 }) {
   if (node.type === 'leaf') {
     return (
@@ -179,6 +187,7 @@ export function PaneTree({
         tabId={tabId}
         focused={tabActive && node.id === focusedLeafId}
         canClose={canClose}
+        hideBar={depth === 0}
       />
     )
   }
@@ -202,6 +211,7 @@ export function PaneTree({
               focusedLeafId={focusedLeafId}
               tabActive={tabActive}
               canClose
+              depth={depth + 1}
             />
           </Panel>
         </Fragment>

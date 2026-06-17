@@ -108,9 +108,11 @@ export function McpPanel() {
                   ))}
                 </div>
               )}
-              <button className="git-linkbtn mcp-card__copy" onClick={() => void copy(addSnippet(server))}>
-                <Copy size={11} /> Copy add command
-              </button>
+              {(server.scope === 'project' || server.scope === 'user' || server.scope === 'local') && (
+                <button className="git-linkbtn mcp-card__copy" onClick={() => void copy(addSnippet(server))}>
+                  <Copy size={11} /> Copy add command
+                </button>
+              )}
             </div>
           ))
         )}

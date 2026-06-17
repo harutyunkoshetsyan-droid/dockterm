@@ -121,7 +121,7 @@ export interface ProjectInfo {
 
 export type McpTransport = 'stdio' | 'http' | 'sse' | 'unknown'
 
-export type McpScope = 'project' | 'user' | 'local'
+export type McpScope = 'project' | 'user' | 'local' | 'connector' | 'plugin'
 
 export interface McpServerView {
   name: string

@@ -52,18 +52,15 @@ export function createOverlayWindow(): BrowserWindow {
   })
 
   applyWindowSecurity(overlay)
-  // Float above everything, on every Space, including fullscreen apps.
-  overlay.setVisibleOnAllWorkspaces(true, {
-    visibleOnFullScreen: true,
-    skipTransformProcessType: true
-  })
-  overlay.setAlwaysOnTop(true, 'screen-saver')
   // Start click-through; the renderer enables interaction while hovering munu.
   overlay.setIgnoreMouseEvents(true, { forward: true })
 
   const devUrl = process.env['ELECTRON_RENDERER_URL']
   void overlay.loadURL(devUrl ? `${devUrl}/overlay.html` : OVERLAY_URL)
-  overlay.once('ready-to-show', () => overlay?.showInactive())
+  overlay.once('ready-to-show', () => {
+    overlay?.showInactive()
+    reassertOverlayLevel()
+  })
   overlay.on('closed', () => {
     overlay = null
   })
@@ -72,6 +69,25 @@ export function createOverlayWindow(): BrowserWindow {
 
 export function getOverlay(): BrowserWindow | null {
   return overlay && !overlay.isDestroyed() ? overlay : null
+}
+
+/**
+ * Float above everything, on every Space, including other apps' fullscreen.
+ * ORDER MATTERS: setAlwaysOnTop resets the window's macOS collectionBehavior, so
+ * setVisibleOnAllWorkspaces must come AFTER it. Re-asserted right before reveal,
+ * because macOS can drop all-spaces membership when a fullscreen Space activates.
+ */
+export function reassertOverlayLevel(): void {
+  if (!overlay || overlay.isDestroyed()) return
+  try {
+    overlay.setAlwaysOnTop(true, 'screen-saver')
+    overlay.setVisibleOnAllWorkspaces(true, {
+      visibleOnFullScreen: true,
+      skipTransformProcessType: true
+    })
+  } catch {
+    // window may be gone
+  }
 }
 
 export function destroyOverlay(): void {

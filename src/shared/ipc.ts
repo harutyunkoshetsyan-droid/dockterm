@@ -214,7 +214,7 @@ export interface InvokeChannels {
 
   // munu — each window reports its aggregate; the overlay drives answers/focus.
   'munu:report': (req: MunuGlobal) => Result<void>
-  'munu:answer': (req: { key: 'enter' | 'esc' }) => Result<void>
+  'munu:answer': (req: { index: number }) => Result<void>
   'munu:focus': (req: void) => Result<void>
   'munu:setInteractive': (req: { interactive: boolean }) => Result<void>
 }
@@ -228,8 +228,8 @@ export interface EventChannels {
   'munu:state': MunuGlobal
   /** main → overlay: reveal (slide down) or hide (tuck into the notch). */
   'munu:reveal': boolean
-  /** main → the window owning an asking pane: inject the answer key. */
-  'munu:doAnswer': { leafId: string; key: 'enter' | 'esc' }
+  /** main → the window owning an asking pane: select option `index` in the menu. */
+  'munu:doAnswer': { leafId: string; index: number }
   /** main → the window owning an asking pane: focus that pane. */
   'munu:doFocus': { tabId: string; leafId: string }
 }

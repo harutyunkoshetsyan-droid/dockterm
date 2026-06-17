@@ -14,7 +14,7 @@ const reportSchema = z.object({
   state: z.enum(['idle', 'working', 'asking', 'done']),
   asks: z.array(askSchema).max(64)
 })
-const answerSchema = z.object({ key: z.enum(['enter', 'esc']) })
+const answerSchema = z.object({ index: z.number().int().min(0).max(32) })
 const interactiveSchema = z.object({ interactive: z.boolean() })
 
 export function registerMunuHandlers(reg: Registrar): void {
@@ -24,7 +24,7 @@ export function registerMunuHandlers(reg: Registrar): void {
   })
 
   reg('munu:answer', answerSchema, (req) => {
-    answerMunu(req.key)
+    answerMunu(req.index)
     return ok(undefined)
   })
 

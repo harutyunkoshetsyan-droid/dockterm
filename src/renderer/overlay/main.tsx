@@ -8,8 +8,8 @@ import './overlay.css'
 const setInteractive = (v: boolean): void => {
   void window.dockterm.invoke('munu:setInteractive', { interactive: v })
 }
-const answer = (key: 'enter' | 'esc'): void => {
-  void window.dockterm.invoke('munu:answer', { key })
+const answer = (index: number): void => {
+  void window.dockterm.invoke('munu:answer', { index })
 }
 const focus = (): void => {
   void window.dockterm.invoke('munu:focus', undefined)
@@ -35,7 +35,6 @@ function Overlay() {
     return window.dockterm.on('settings:changed', (s) => setSounds(s.munu.sounds))
   }, [])
 
-  // Cue on entering asking / done (the "whole work finished" chime).
   useEffect(() => {
     if (g.state !== prev.current) {
       if (sounds && g.state === 'asking') playAsk()
@@ -46,7 +45,8 @@ function Overlay() {
 
   const asking = g.state === 'asking'
   const ask = g.asks[0]
-  const showCard = asking && !!ask?.binary // only true yes/no gets one-click buttons
+  const options = ask?.options ?? []
+  const showCard = asking && options.length > 0
 
   return (
     <div className={`ov ov--${platform}${revealed ? ' ov--revealed' : ' ov--hidden'}`}>
@@ -59,39 +59,35 @@ function Overlay() {
         }}
         title="munu"
       >
-        <Munu state={g.state} size={showCard ? 32 : 40} />
+        <Munu state={g.state} size={showCard ? 34 : 48} />
         {showCard && (
           <div className="island__card">
             {ask?.title && <div className="island__title">{ask.title}</div>}
-            <div className="island__actions">
-              <button
-                className="ob ob--yes"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  answer('enter')
-                }}
-              >
-                [y] yes
-              </button>
-              <button
-                className="ob ob--no"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  answer('esc')
-                }}
-              >
-                [n] no
-              </button>
-              <button
-                className="ob"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  focus()
-                }}
-              >
-                open
-              </button>
+            <div className="island__opts">
+              {options.map((opt, i) => (
+                <button
+                  key={i}
+                  className={`ob${i === 0 ? ' ob--first' : ''}`}
+                  title={opt}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    answer(i)
+                  }}
+                >
+                  <span className="num">{i + 1}</span>
+                  <span className="lbl">{opt}</span>
+                </button>
+              ))}
             </div>
+            <button
+              className="ob ob--open"
+              onClick={(e) => {
+                e.stopPropagation()
+                focus()
+              }}
+            >
+              open terminal
+            </button>
           </div>
         )}
       </div>

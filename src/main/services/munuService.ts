@@ -5,6 +5,7 @@ import {
   createOverlayWindow,
   destroyOverlay,
   getOverlay,
+  reassertOverlayLevel,
   setOverlayInteractive as setOverlayClickThrough
 } from '../overlayWindow'
 import type { MunuAsk, MunuGlobal, MunuState } from '@shared/types'
@@ -37,6 +38,9 @@ function pollReveal(): void {
   const want = lastGlobalState === 'asking' || inRevealZone() || Date.now() < peekUntil
   if (want !== revealed) {
     revealed = want
+    // Re-assert all-spaces/always-on-top right before showing, so munu appears
+    // even on another app's fullscreen Space (macOS drops this otherwise).
+    if (want) reassertOverlayLevel()
     overlay.webContents.send('munu:reveal', want)
   }
 }
@@ -97,9 +101,9 @@ function ownerOfPrimaryAsk(): { wc: Electron.WebContents; ask: MunuAsk } | null 
   return null
 }
 
-export function answerMunu(key: 'enter' | 'esc'): void {
+export function answerMunu(index: number): void {
   const o = ownerOfPrimaryAsk()
-  if (o) o.wc.send('munu:doAnswer', { leafId: o.ask.leafId, key })
+  if (o) o.wc.send('munu:doAnswer', { leafId: o.ask.leafId, index })
 }
 
 export function focusMunu(): void {

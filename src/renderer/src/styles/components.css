@@ -278,7 +278,7 @@
   height: 100%;
   width: 100%;
   background: var(--bg);
-  padding: 6px 4px 6px 8px;
+  padding: 8px 6px 8px 12px;
   overflow: hidden;
 }
 .terminal__surface {

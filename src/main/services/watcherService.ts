@@ -1,8 +1,24 @@
 import { watch, type FSWatcher } from 'chokidar'
-import { relative, sep } from 'node:path'
+import os from 'node:os'
+import { relative, resolve, sep } from 'node:path'
 import type { BrowserWindow } from 'electron'
 import { IGNORED_ENTRIES, WATCH_DEBOUNCE_MS, SESSION_CHANGE_LOG_CAP } from '@shared/constants'
 import type { WatchEvent } from '@shared/ipc'
+
+/**
+ * Recursively watching an enormous tree (the home directory, a filesystem root)
+ * makes chokidar walk millions of paths and freezes the main process. Projects
+ * never live at those roots, so we simply don't watch them — the file tree still
+ * works on demand; there are just no live change events.
+ */
+function isTooLargeToWatch(root: string): boolean {
+  const r = resolve(root)
+  const home = resolve(os.homedir())
+  if (r === home) return true
+  if (resolve(r, '..') === r) return true // filesystem root (/ or C:\)
+  if (home === r || home.startsWith(r + sep)) return true // an ancestor of home (e.g. /Users)
+  return false
+}
 
 /** One chokidar watcher per window, targeting that window's focused project. */
 interface WindowWatch {
@@ -44,10 +60,15 @@ export function retargetWatcher(win: BrowserWindow, projectRoot: string): void {
   if (existing && existing.root === projectRoot) return
   closeWatch(id)
 
+  // Never recursively watch the home dir / a filesystem root — it would walk
+  // millions of paths and hang the app. (The file tree still works; no live
+  // change events for such folders.)
+  if (isTooLargeToWatch(projectRoot)) return
+
   const watcher = watch(projectRoot, {
     ignoreInitial: true,
     followSymlinks: false,
-    depth: 99,
+    depth: 16,
     ignored: (p: string) => {
       const segments = p.split(/[\\/]/)
       return IGNORED_ENTRIES.some((entry) => segments.includes(entry))

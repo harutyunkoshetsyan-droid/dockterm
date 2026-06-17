@@ -69,7 +69,13 @@ export function useTerminal(options: TerminalOptions): TerminalHandle {
       allowProposedApi: true,
       macOptionIsMeta: true,
       theme: useThemeStore.getState().xterm,
-      fontWeightBold: '600'
+      fontWeightBold: '600',
+      // Comfort: smooth wheel scrolling, a calmer cursor blink, and a touch more
+      // line height so output is easier to read.
+      smoothScrollDuration: 120,
+      cursorInactiveStyle: 'outline',
+      lineHeight: 1.15,
+      scrollSensitivity: 1.1
     })
     termRef.current = term
 

@@ -30,9 +30,15 @@ function inRevealZone(): boolean {
   return Math.abs(p.x - cx) <= 175 && p.y >= d.bounds.y && p.y <= d.bounds.y + 120
 }
 
+let pollTicks = 0
+
 function pollReveal(): void {
   const overlay = getOverlay()
   if (!overlay) return
+  // Periodically re-assert all-spaces/always-on-top (~every 2.8s) so munu keeps
+  // floating over fullscreen even after you switch into a fullscreen Space —
+  // macOS can silently drop that membership on a Space change.
+  if (++pollTicks % 20 === 0) reassertOverlayLevel()
   // Always reveal while Claude needs you (don't miss it); otherwise reveal on
   // hover or during a post-state-change peek.
   const want = lastGlobalState === 'asking' || inRevealZone() || Date.now() < peekUntil

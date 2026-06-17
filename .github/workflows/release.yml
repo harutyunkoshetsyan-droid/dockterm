@@ -19,9 +19,8 @@ jobs:
         include:
           - { os: windows-latest, args: '--win --x64', label: windows-x64 }
           # Both macOS arches build on Apple-Silicon runners (macos-14): the Intel
-          # macos-13 runners are scarce/deprecated and were stalling releases. An
-          # arm64 runner cross-builds the x64 .dmg fine, and the two jobs run in
-          # parallel so Apple notarization happens concurrently.
+          # macos-13 runners are scarce/deprecated and were stalling releases. Two
+          # parallel jobs each build + notarize their own arch's .dmg.
           - { os: macos-14, args: '--mac --arm64', label: mac-arm64 }
           - { os: macos-14, args: '--mac --x64', label: mac-x64 }
           - { os: ubuntu-latest, args: '--linux --x64', label: linux-x64 }
@@ -39,6 +38,10 @@ jobs:
 
       - name: Build bundles
         run: npm run build
+        # The renderer bundle (Monaco) is heavy; raise the V8 heap so the build
+        # never OOMs on a runner with a low default limit.
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
 
       - name: Package and publish installer
         shell: bash

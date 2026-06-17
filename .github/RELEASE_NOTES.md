@@ -3,9 +3,11 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v0.13.0 — click an error, land on the line
+## 🎯 What's new in v0.13.1 — jump to the line, smoother scrolling
 
-- **Clicked paths now jump to the exact line.** Click something like `src/server.ts:42` in the terminal and DockTerm opens the file *and* scrolls to line 42 — go straight from a stack trace to the code.
+- **Clicked paths jump to the exact line.** Click something like `src/server.ts:42` in the terminal and DockTerm opens the file *and* scrolls to line 42.
+- **Smoother terminal scrolling.** Removed the scroll animation that fought the trackpad — scrolling now feels native and instant.
+- **munu over fullscreen, improved.** Better at staying visible (and re-appearing) over fullscreen apps.
 
 ---
 

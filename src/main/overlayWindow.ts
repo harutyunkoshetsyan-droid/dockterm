@@ -38,7 +38,10 @@ export function createOverlayWindow(): BrowserWindow {
     fullscreenable: false,
     skipTaskbar: true,
     hasShadow: false,
-    focusable: false,
+    // Focusable so macOS will float it over ANOTHER app's fullscreen Space
+    // (non-focusable panels often won't appear there). It never steals focus:
+    // shown via showInactive() and click-through until you hover munu.
+    focusable: true,
     show: false,
     backgroundColor: '#00000000',
     roundedCorners: false,

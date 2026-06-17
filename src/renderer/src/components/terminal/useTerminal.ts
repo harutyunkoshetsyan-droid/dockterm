@@ -73,12 +73,11 @@ export function useTerminal(options: TerminalOptions): TerminalHandle {
       macOptionIsMeta: true,
       theme: useThemeStore.getState().xterm,
       fontWeightBold: '600',
-      // Comfort: smooth wheel scrolling, a calmer cursor blink, and a touch more
-      // line height so output is easier to read.
-      smoothScrollDuration: 120,
+      // No smoothScrollDuration: animating each wheel delta fights the OS
+      // trackpad momentum and feels laggy. Instant scroll matches native
+      // terminals. Slightly taller lines + a calm inactive cursor for comfort.
       cursorInactiveStyle: 'outline',
-      lineHeight: 1.15,
-      scrollSensitivity: 1.1
+      lineHeight: 1.15
     })
     termRef.current = term
 

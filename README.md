@@ -39,6 +39,9 @@ It runs locally. No accounts, no telemetry, and it never calls an AI of its own 
 
 DockTerm reads Claude's state from the terminal output and shows it as **munu**, a small face near your menu bar — in the notch, on a MacBook. At a glance you can tell whether Claude is working, finished, or waiting for a `[y/n]`, even when DockTerm is behind another window. When Claude pauses to ask permission, munu surfaces the prompt so you can answer with one click and never lose your flow. It infers everything from the terminal; it never auto-answers and never calls an API.
 
+<p align="center"><img src="docs/screenshots/fullscreen.png" alt="munu surfacing a Claude permission prompt over a fullscreen video" width="900"></p>
+<p align="center"><sub>Go watch something fullscreen — munu floats over it (even on another desktop/Space) and brings Claude's prompt to you, so you never miss it.</sub></p>
+
 <table align="center">
   <tr>
     <td align="center" width="110"><img src="assets/brand/munu.svg"         width="56"></td>

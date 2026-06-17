@@ -85,7 +85,7 @@ const settingsSchema = z.object({
   git: preference.git,
   claude: preference.claude,
   munu: preference.munu,
-  theme: z.string().default('dockterm-dark'),
+  theme: z.string().default('dockterm-graphite'),
   workspace: workspaceSchema,
   checkpoints: z.record(checkpointSchema).default({})
 })

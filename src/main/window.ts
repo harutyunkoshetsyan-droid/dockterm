@@ -21,7 +21,7 @@ export function createWindow(): BrowserWindow {
     minHeight: 320,
     show: false,
     // Transparent on macOS so the window vibrancy shows through translucent chrome.
-    backgroundColor: isMac ? '#00000000' : '#0d0d0f',
+    backgroundColor: isMac ? '#00000000' : '#1e1e1d',
     title: 'DockTerm',
     autoHideMenuBar: true,
     // macOS: hide the OS title bar (content runs to the top edge) but keep the

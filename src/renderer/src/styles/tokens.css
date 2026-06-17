@@ -1,18 +1,18 @@
 :root {
-  /* Layered backgrounds (near-black, calm). */
-  --bg: #0d0d0f;
-  --panel: #131318;
-  --raised: #1a1a21;
-  --overlay: #1f1f29;
+  /* Layered backgrounds (warm graphite — the default theme). */
+  --bg: #1e1e1d;
+  --panel: #252524;
+  --raised: #2d2d2b;
+  --overlay: #353532;
 
   /* Borders. */
-  --border: #26262e;
-  --border-strong: #34343f;
+  --border: #34342f;
+  --border-strong: #45453e;
 
   /* Text tiers. */
-  --text: #e8e8ed;
-  --text-dim: #a0a0ab;
-  --text-faint: #6b6b76;
+  --text: #e8e8e3;
+  --text-dim: #a2a29a;
+  --text-faint: #6f6f67;
 
   /* Accent (violet default; overridable via [data-accent]). */
   --accent: #7c6bff;

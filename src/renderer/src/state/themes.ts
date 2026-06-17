@@ -101,6 +101,17 @@ function make(id: string, name: string, p: Palette): Theme {
 }
 
 export const THEMES: Theme[] = [
+  make('dockterm-graphite', 'DockTerm Graphite', {
+    appearance: 'dark',
+    bg: '#1e1e1d', panel: '#252524', raised: '#2d2d2b', overlay: '#353532',
+    border: '#34342f', borderStrong: '#45453e',
+    text: '#e8e8e3', textDim: '#a2a29a', textFaint: '#6f6f67',
+    accent: '#7c6bff', accentHover: '#8d7dff', onAccent: '#ffffff',
+    black: '#2a2a27', red: '#f87171', green: '#4ade80', yellow: '#fbbf24',
+    blue: '#5b8aff', magenta: '#a78bfa', cyan: '#2dd4bf', white: '#c8c8c2',
+    brBlack: '#4a4a44', brRed: '#fb9a9a', brGreen: '#86efac', brYellow: '#fde68a',
+    brBlue: '#93b4ff', brMagenta: '#c4b5fd', brCyan: '#5eead4', brWhite: '#f4f4ef'
+  }),
   make('dockterm-dark', 'DockTerm Dark', {
     appearance: 'dark',
     bg: '#0d0d0f', panel: '#131318', raised: '#1a1a21', overlay: '#1f1f29',
@@ -182,7 +193,7 @@ export const THEMES: Theme[] = [
 
 export const THEME_MAP: Record<string, Theme> = Object.fromEntries(THEMES.map((t) => [t.id, t]))
 
-export const DEFAULT_THEME_ID = 'dockterm-dark'
+export const DEFAULT_THEME_ID = 'dockterm-graphite'
 const DEFAULT_LIGHT_ID = 'dockterm-light'
 
 /** Resolve a stored selection (a theme id, or 'auto') to a concrete theme. */

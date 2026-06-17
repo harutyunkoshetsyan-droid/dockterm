@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-  A terminal-first desktop app for <a href="https://www.anthropic.com/claude-code">Claude Code</a>.<br>
+  A terminal-first workspace for <a href="https://www.anthropic.com/claude-code">Claude Code</a>.<br>
   Run <code>claude</code> like you do today — diffs, Git, files and MCP are one keypress away,<br>
-  and a little face in your notch tells you the moment Claude needs you.
+  and a little face in your notch tells you the moment Claude needs you — even over a fullscreen app.
 </p>
 
 <p align="center">

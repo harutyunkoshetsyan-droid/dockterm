@@ -136,7 +136,7 @@ function TerminalPane({
           }}
           onCwd={(cwd) => useWorkspaceStore.getState().setPaneCwd(leaf.id, cwd)}
           onStatus={(state, ask) => useMunuStore.getState().setPaneStatus(leaf.id, tabId, state, ask)}
-          onOpenPath={(raw) => {
+          onOpenPath={(raw, line) => {
             // Resolve a path clicked in output to a project-relative path and open it.
             const root = useAppStore.getState().activeRoot
             let p = raw.replace(/\\/g, '/').replace(/^\.\//, '')
@@ -147,7 +147,7 @@ function TerminalPane({
             }
             // Skip paths outside the open project (can't be jailed-opened).
             if (p.startsWith('/') || /^[A-Za-z]:\//.test(p)) return
-            void useEditorStore.getState().open(p, p.split('/').pop() ?? p)
+            void useEditorStore.getState().open(p, p.split('/').pop() ?? p, line ?? undefined)
           }}
           onActivity={() => markActivity(tabId)}
           fontFamily={t?.fontFamily ?? undefined}

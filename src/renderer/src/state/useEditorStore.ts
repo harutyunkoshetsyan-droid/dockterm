@@ -24,7 +24,10 @@ const IMAGE_EXT = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'ico', 'av
 interface EditorState {
   tabs: EditorTab[]
   activePath: string | null
-  open: (relPath: string, name: string) => Promise<void>
+  /** A pending "jump to this line" request for the editor (from a clicked path). */
+  goto: { relPath: string; line: number } | null
+  clearGoto: () => void
+  open: (relPath: string, name: string, line?: number) => Promise<void>
   close: (relPath: string) => void
   closeActive: () => void
   closeAll: () => void
@@ -36,8 +39,12 @@ interface EditorState {
 export const useEditorStore = create<EditorState>((set, get) => ({
   tabs: [],
   activePath: null,
+  goto: null,
 
-  open: async (relPath, name) => {
+  clearGoto: () => set({ goto: null }),
+
+  open: async (relPath, name, line) => {
+    if (line != null) set({ goto: { relPath, line } })
     if (get().tabs.some((t) => t.relPath === relPath)) {
       set({ activePath: relPath })
       return

@@ -33,8 +33,8 @@ export interface TerminalOptions {
   onCwd?: (cwd: string) => void
   /** Reports the pane's inferred Claude state from the rendered buffer. */
   onStatus?: (state: ClaudeState, ask: AskInfo | null) => void
-  /** Open a file path clicked in the terminal output. */
-  onOpenPath?: (path: string) => void
+  /** Open a file path clicked in the terminal output (with optional 1-based line). */
+  onOpenPath?: (path: string, line: number | null) => void
 }
 
 export interface TerminalHandle {
@@ -121,7 +121,7 @@ export function useTerminal(options: TerminalOptions): TerminalHandle {
               end: { x: f.index + f.length, y: bufferLineNumber }
             },
             text: f.path,
-            activate: () => optsRef.current.onOpenPath?.(f.path)
+            activate: () => optsRef.current.onOpenPath?.(f.path, f.line)
           }))
         )
       }

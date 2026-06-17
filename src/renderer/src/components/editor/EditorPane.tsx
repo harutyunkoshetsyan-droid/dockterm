@@ -60,6 +60,7 @@ export function EditorPane() {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
   const activePath = useEditorStore((s) => s.activePath)
   const tabs = useEditorStore((s) => s.tabs)
+  const goto = useEditorStore((s) => s.goto)
   const fontSize = useAppStore((s) => s.settings?.editor.fontSize ?? 13)
   const appTheme = useThemeStore((s) => s.theme)
 
@@ -125,6 +126,19 @@ export function EditorPane() {
     const model = monaco.editor.getModel(uri) ?? monaco.editor.createModel(tab.content, tab.language, uri)
     if (editor.getModel() !== model) editor.setModel(model)
   }, [activePath, tabs])
+
+  // Jump to a line when a clicked path carried one (e.g. server.ts:42).
+  useEffect(() => {
+    const editor = editorRef.current
+    if (!editor || !goto || goto.relPath !== activePath) return
+    const model = editor.getModel()
+    if (!model) return
+    const line = Math.min(Math.max(1, goto.line), model.getLineCount())
+    editor.revealLineInCenter(line)
+    editor.setPosition({ lineNumber: line, column: 1 })
+    editor.focus()
+    useEditorStore.getState().clearGoto()
+  }, [goto, activePath, tabs])
 
   // Dispose models for closed tabs.
   useEffect(() => {

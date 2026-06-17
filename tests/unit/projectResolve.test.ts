@@ -30,4 +30,25 @@ describe('resolveProjectRoot', () => {
   it('falls back to the cwd itself when nothing is found', () => {
     expect(resolveProjectRoot(deep, fakeExists([]))).toBe(deep)
   })
+
+  it('does NOT collapse a subfolder up into $HOME when home has a .git', () => {
+    const home = join('/Users', 'me')
+    const proj = join(home, 'projects', 'foo')
+    // home has a dotfiles .git, foo has none → should resolve to foo, not home.
+    expect(resolveProjectRoot(proj, fakeExists([join(home, '.git')]), home)).toBe(proj)
+  })
+
+  it('still returns home when the cwd itself is home', () => {
+    const home = join('/Users', 'me')
+    expect(resolveProjectRoot(home, fakeExists([join(home, '.git')]), home)).toBe(home)
+  })
+
+  it('still finds a real project under home before reaching home', () => {
+    const home = join('/Users', 'me')
+    const proj = join(home, 'work', 'app')
+    const deep2 = join(proj, 'src')
+    expect(
+      resolveProjectRoot(deep2, fakeExists([join(proj, '.git'), join(home, '.git')]), home)
+    ).toBe(proj)
+  })
 })

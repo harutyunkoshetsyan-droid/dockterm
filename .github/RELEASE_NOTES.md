@@ -3,13 +3,11 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v0.18.0 — munu, everywhere and rock-solid
+## 🎯 What's new in v0.19.0 — instant munu, correct dock
 
-- **Visible over fullscreen apps.** Fixed the macOS setup that kept munu off another app's fullscreen Space — it now floats on every Space (the previous build skipped the process-type transform that makes this work).
-- **Bigger and always fully visible.** munu is a touch larger, the card is wider, and a long menu now scrolls inside a card sized to your actual screen — nothing clips.
-- **Multi-select can't mis-select anymore.** Toggling is now instant in the card and sends one clean, ordered sequence on Submit (computed from Claude's real cursor), so fast/random clicking always submits exactly what you picked.
-- **"Type something" → type right in munu.** Pick a free-text option and a text field opens in the card (or open the terminal to type there).
-- Plus everything from v0.17.0: wizard steps, option descriptions, the review-screen fix, and Cancel.
+- **No more state lag.** When you answer in munu (Yes / Submit / a choice), the card now closes and munu updates **immediately** instead of ~2s later — it no longer waits for the just-answered menu to scroll out of the terminal buffer.
+- **The dock shows the right project.** Fixed a case where panes whose folder had no `.git` of their own collapsed up to your home directory (because a `.git` in `$HOME` — dotfiles repos — was claiming them). The dock now stops at home and shows the actual folder.
+- Plus everything from v0.18.0: fullscreen visibility, bigger/fully-visible card, robust multi-select, and the "Type something" text field.
 
 ---
 

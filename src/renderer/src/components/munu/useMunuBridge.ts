@@ -50,6 +50,10 @@ export function useMunuBridge(): void {
       timer = setTimeout(drain, 70)
     }
     const off = window.dockterm.on('munu:doAnswer', ({ leafId, keys }) => {
+      // Every munu answer resolves the prompt (toggles don't send keys), so close
+      // the card / tuck munu right away instead of waiting for the classifier to
+      // notice the menu is gone (the stale menu lingers in the buffer ~2s).
+      useMunuStore.getState().markAnswered(leafId)
       for (const key of keys) queue.push({ leafId, key })
       if (!draining) {
         draining = true

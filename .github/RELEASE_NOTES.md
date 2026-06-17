@@ -3,10 +3,11 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v0.13.1 — jump to the line, smoother scrolling
+## 🎯 What's new in v0.14.0 — splitting never kills your session
 
-- **Clicked paths jump to the exact line.** Click something like `src/server.ts:42` in the terminal and DockTerm opens the file *and* scrolls to line 42.
-- **Smoother terminal scrolling.** Removed the scroll animation that fought the trackpad — scrolling now feels native and instant.
+- **Split or build a grid without losing Claude.** Terminals now live independently of the layout, so splitting a pane, making a grid, or closing a sibling no longer restarts your running shells — your Claude session keeps going.
+- **Native-feeling scrolling.** Removed the scroll animation that fought the trackpad — scrolling is now instant and smooth like a normal terminal.
+- **Clicked paths jump to the exact line.** Click `src/server.ts:42` in the output and DockTerm opens the file *and* scrolls to line 42.
 - **munu over fullscreen, improved.** Better at staying visible (and re-appearing) over fullscreen apps.
 
 ---

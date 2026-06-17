@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState, type DragEvent, type MouseEvent } from 'react'
+import { Fragment, useRef, useState, type DragEvent, type MouseEvent } from 'react'
 import { Group, Panel, Separator } from 'react-resizable-panels'
 import { SplitSquareHorizontal, SplitSquareVertical, X } from 'lucide-react'
 import { useAppStore } from '../../state/useAppStore'
@@ -38,14 +38,9 @@ function TerminalPane({
   const pasteRef = useRef<(text: string) => void>(() => {})
   const [dragOver, setDragOver] = useState(false)
 
-  // Drop this pane's Claude-state + writer when it unmounts (closed/retargeted).
-  useEffect(
-    () => () => {
-      useMunuStore.getState().removePane(leaf.id)
-      paneWriters.unregister(leaf.id)
-    },
-    [leaf.id]
-  )
+  // Note: the pane's Claude-state + writer registrations are dropped by the
+  // terminal pool when the terminal is truly disposed (pane closed / GC'd), not
+  // on every React unmount — so a split/grid re-mount keeps the running shell.
 
   const act = (fn: () => void) => (e: MouseEvent) => {
     e.stopPropagation()
@@ -127,6 +122,8 @@ function TerminalPane({
       <div className="pane__term">
         <TerminalView
           key={`${leaf.id}:${leaf.cwd}`}
+          id={leaf.id}
+          persist
           kind="main"
           cwd={leaf.cwd}
           active={focused}

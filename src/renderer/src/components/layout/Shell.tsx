@@ -12,6 +12,7 @@ import { Divider } from './Divider'
 import { TabStrip } from '../terminal/TabStrip'
 import { PaneTree } from '../terminal/PaneTree'
 import { MiniTerminal } from '../terminal/MiniTerminal'
+import { gcTerminals } from '../terminal/terminalPool'
 
 // Lazily loaded so Monaco (the editor) isn't part of the startup bundle.
 const EditorPane = lazy(() => import('../editor/EditorPane').then((m) => ({ default: m.EditorPane })))
@@ -58,6 +59,15 @@ export function Shell() {
     }
     wsProject.current = projectPath
   }, [projectPath])
+
+  // Garbage-collect pooled terminals whose pane no longer exists in any tab, so
+  // closing a pane or tab tears down its shell — while a split/grid re-mount
+  // (which keeps the leaf in the layout) keeps the running shell alive.
+  useEffect(() => {
+    const live = new Set<string>()
+    for (const t of terminals) for (const leaf of allLeaves(t.layout)) live.add(leaf.id)
+    gcTerminals(live)
+  }, [terminals])
 
   // Point the dock (files/git/…) at the focused pane's project, and refresh.
   useEffect(() => {
@@ -198,7 +208,13 @@ export function Shell() {
             <div className="minit">
               <div className="minit__bar">mini terminal</div>
               <div className="minit__body">
-                <MiniTerminal key={`mini-${project.path}`} kind="mini" cwd={project.path} {...termProps} />
+                <MiniTerminal
+                  key={`mini-${project.path}`}
+                  id={`mini:${project.path}`}
+                  kind="mini"
+                  cwd={project.path}
+                  {...termProps}
+                />
               </div>
             </div>
           </div>

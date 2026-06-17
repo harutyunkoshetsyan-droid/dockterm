@@ -46,7 +46,22 @@ DockTerm reads Claude's state from the terminal output and shows it as **munu**,
 <p align="center"><img src="docs/screenshots/fullscreen.png" alt="munu surfacing a Claude permission prompt over a fullscreen video" width="900"></p>
 <p align="center"><sub>Go watch something fullscreen — munu floats over it (even on another desktop/Space) and brings Claude's prompt to you, so you never miss it.</sub></p>
 
-<p align="center"><img src="docs/screenshots/munu-states.png" alt="munu states — resting, working, needs you, done, no project" width="820"></p>
+<table align="center">
+  <tr>
+    <td align="center" width="136"><img src="assets/brand/munu.svg"         width="104"></td>
+    <td align="center" width="136"><img src="assets/brand/munu-working.svg"  width="104"></td>
+    <td align="center" width="136"><img src="assets/brand/munu-asking.svg"   width="104"></td>
+    <td align="center" width="136"><img src="assets/brand/munu-happy.svg"    width="104"></td>
+    <td align="center" width="136"><img src="assets/brand/munu-sleeping.svg" width="104"></td>
+  </tr>
+  <tr>
+    <td align="center">resting</td>
+    <td align="center">working</td>
+    <td align="center">needs you</td>
+    <td align="center">done</td>
+    <td align="center">no project</td>
+  </tr>
+</table>
 
 It tucks into the notch and slides out on hover, peeks for a few seconds when Claude's state changes, and stays out while Claude needs you. On Windows and Linux it's a small auto-hiding pill at the top of the screen.
 

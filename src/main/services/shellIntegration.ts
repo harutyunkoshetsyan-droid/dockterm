@@ -1,6 +1,6 @@
 import { app } from 'electron'
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
-import { join, basename } from 'node:path'
+import { join } from 'node:path'
 
 /**
  * Shell integration: make the spawned shell emit OSC 7 (its working directory) on
@@ -15,7 +15,9 @@ import { join, basename } from 'node:path'
 export type ShellKind = 'zsh' | 'bash' | 'pwsh' | 'other'
 
 export function shellKind(file: string): ShellKind {
-  const b = basename(file).toLowerCase().replace(/\.exe$/, '')
+  // Split on BOTH separators so a Windows-style path classifies correctly on any
+  // OS — node:path.basename only splits "\" on win32, which broke this on macOS.
+  const b = (file.split(/[\\/]/).pop() ?? '').toLowerCase().replace(/\.exe$/i, '')
   if (b === 'zsh') return 'zsh'
   if (b === 'bash') return 'bash'
   if (b === 'pwsh' || b === 'powershell') return 'pwsh'

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="nvurd — resting">
+  <defs>
+    <radialGradient id="glowNV" cx="50%" cy="47%" r="56%">
+      <stop offset="0" stop-color="#e07bc6" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#e07bc6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="screenNV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f1b24"/><stop offset="0.5" stop-color="#15131a"/><stop offset="1" stop-color="#0d0c0f"/>
+    </linearGradient>
+    <linearGradient id="bevelNV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#473a47"/><stop offset="1" stop-color="#241f29"/>
+    </linearGradient>
+    <linearGradient id="sheenNV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="eyeNV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6c2e9"/><stop offset="0.5" stop-color="#e07bc6"/><stop offset="1" stop-color="#b8458f"/>
+    </linearGradient>
+    <linearGradient id="bowNV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f29ad6"/><stop offset="1" stop-color="#cf5ca8"/>
+    </linearGradient>
+    <radialGradient id="hlNV" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.92"/><stop offset="0.7" stop-color="#ffffff" stop-opacity="0.5"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softNV" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4"/></filter>
+  </defs>
+
+  <circle cx="128" cy="120" r="132" fill="url(#glowNV)"/>
+
+  <!-- feet -->
+  <rect x="100" y="184" width="20" height="32" rx="10" fill="#161318" stroke="url(#bevelNV)" stroke-width="2.5"/>
+  <rect x="136" y="184" width="20" height="32" rx="10" fill="#161318" stroke="url(#bevelNV)" stroke-width="2.5"/>
+
+  <!-- soft tall capsule body -->
+  <rect x="70" y="46" width="116" height="150" rx="56" fill="url(#screenNV)" stroke="url(#bevelNV)" stroke-width="3"/>
+  <rect x="82" y="56" width="92" height="42" rx="22" fill="url(#sheenNV)"/>
+  <ellipse cx="128" cy="200" rx="58" ry="14" fill="#000" opacity="0.22" filter="url(#softNV)"/>
+
+  <!-- bow -->
+  <path d="M128 46 C112 32 92 34 92 46 C92 58 112 60 128 46 Z" fill="url(#bowNV)"/>
+  <path d="M128 46 C144 32 164 34 164 46 C164 58 144 60 128 46 Z" fill="url(#bowNV)"/>
+  <circle cx="128" cy="46" r="8" fill="#cf5ca8"/>
+  <circle cx="125" cy="43" r="3" fill="#ffffff" opacity="0.5"/>
+
+  <!-- lashes -->
+  <g stroke="#f6c2e9" stroke-width="3" stroke-linecap="round" fill="none">
+    <path d="M92 100 l-7 -6"/><path d="M91 108 l-8 -3"/>
+    <path d="M164 100 l7 -6"/><path d="M165 108 l8 -3"/>
+  </g>
+
+  <!-- eyes -->
+  <rect x="90" y="100" width="34" height="46" rx="16" fill="url(#eyeNV)"/>
+  <rect x="132" y="100" width="34" height="46" rx="16" fill="url(#eyeNV)"/>
+  <circle cx="100" cy="112" r="7" fill="url(#hlNV)"/>
+  <circle cx="142" cy="112" r="7" fill="url(#hlNV)"/>
+  <path d="M108 134 a4 4 0 0 1 8 0" fill="#ffffff" opacity="0.45"/>
+  <path d="M150 134 a4 4 0 0 1 8 0" fill="#ffffff" opacity="0.45"/>
+
+  <!-- blush -->
+  <ellipse cx="84" cy="150" rx="11" ry="6.5" fill="#f29ad6" opacity="0.45" filter="url(#softNV)"/>
+  <ellipse cx="172" cy="150" rx="11" ry="6.5" fill="#f29ad6" opacity="0.45" filter="url(#softNV)"/>
+
+  <!-- shell-cursor smile -->
+  <ellipse cx="128" cy="160" rx="22" ry="7" fill="#e07bc6" opacity="0.14" filter="url(#softNV)"/>
+  <path d="M114 158 Q128 171 142 158" fill="none" stroke="#e07bc6" stroke-width="8" stroke-linecap="round"/>
+</svg>

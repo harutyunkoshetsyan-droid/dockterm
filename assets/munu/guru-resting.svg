@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="guru — resting">
+  <defs>
+    <radialGradient id="glowGU" cx="50%" cy="47%" r="56%">
+      <stop offset="0" stop-color="#4ade80" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#4ade80" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="caseGU" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b2b33"/><stop offset="1" stop-color="#191920"/>
+    </linearGradient>
+    <linearGradient id="screenGU" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0f1a12"/><stop offset="0.5" stop-color="#0c130d"/><stop offset="1" stop-color="#0a0d0a"/>
+    </linearGradient>
+    <linearGradient id="bevelGU" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#46464f"/><stop offset="1" stop-color="#222229"/>
+    </linearGradient>
+    <linearGradient id="eyeGU" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9bf3b8"/><stop offset="0.5" stop-color="#4ade80"/><stop offset="1" stop-color="#2a9c57"/>
+    </linearGradient>
+    <radialGradient id="hlGU" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/><stop offset="0.7" stop-color="#ffffff" stop-opacity="0.45"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softGU" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4"/></filter>
+  </defs>
+
+  <circle cx="128" cy="118" r="132" fill="url(#glowGU)"/>
+
+  <!-- stand base -->
+  <rect x="116" y="186" width="24" height="14" rx="4" fill="#161620" stroke="url(#bevelGU)" stroke-width="2"/>
+  <rect x="92" y="198" width="72" height="16" rx="8" fill="#1c1c25" stroke="url(#bevelGU)" stroke-width="2.5"/>
+  <ellipse cx="128" cy="210" rx="62" ry="13" fill="#000" opacity="0.22" filter="url(#softGU)"/>
+
+  <!-- CRT case -->
+  <rect x="44" y="50" width="168" height="138" rx="30" fill="url(#caseGU)" stroke="url(#bevelGU)" stroke-width="3"/>
+  <!-- inset screen -->
+  <rect x="62" y="64" width="118" height="106" rx="20" fill="url(#screenGU)" stroke="#0a0d0a" stroke-width="2"/>
+  <!-- right control strip -->
+  <circle cx="196" cy="90" r="5" fill="#3a3a44"/>
+  <circle cx="196" cy="108" r="5" fill="#3a3a44"/>
+  <rect x="190" y="124" width="12" height="5" rx="2.5" fill="#4ade80" opacity="0.8"/>
+
+  <!-- bushy brows -->
+  <path d="M78 88 q16 -12 34 -4" fill="none" stroke="#b9b9c2" stroke-width="8" stroke-linecap="round"/>
+  <path d="M130 84 q18 -8 34 4" fill="none" stroke="#cfcfd6" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- eyes (calm, behind glasses) -->
+  <ellipse cx="96" cy="116" rx="13" ry="11" fill="url(#eyeGU)"/>
+  <ellipse cx="148" cy="116" rx="13" ry="11" fill="url(#eyeGU)"/>
+  <circle cx="91" cy="111" r="5" fill="url(#hlGU)"/>
+  <circle cx="143" cy="111" r="5" fill="url(#hlGU)"/>
+
+  <!-- round glasses -->
+  <g fill="none" stroke="#c8c8d0" stroke-width="3.5">
+    <circle cx="96" cy="116" r="20"/>
+    <circle cx="148" cy="116" r="20"/>
+    <path d="M116 113 q6 -5 12 0"/>
+    <path d="M76 110 l-16 -5"/>
+    <path d="M168 110 l16 -5"/>
+  </g>
+
+  <!-- grey mustache over the cursor mouth -->
+  <path d="M104 150 q-18 2 -22 12 q14 6 24 -4 q12 14 22 0 q12 14 22 4 q-6 -10 -22 -12 q-12 8 -24 0 Z" fill="#bdbdc6"/>
+  <path d="M120 150 q8 6 16 0" fill="none" stroke="#4ade80" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+</svg>

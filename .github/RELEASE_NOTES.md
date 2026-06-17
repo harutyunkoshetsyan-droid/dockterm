@@ -3,14 +3,10 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🛟 What's new in v0.10.3 — new theme, MCP fix, freeze fix & the Dynamic Island
+## 🪄 What's new in v0.11.0 — answer Claude from the notch
 
-- **New default theme: "DockTerm Graphite"** — a softer, warmer dark (`#1e1e1d`) instead of the near-black. It's the new default; pick any other in **Settings → Appearance**.
-- **Your MCP servers actually show up now.** The MCP panel used to only see classic `mcpServers` entries, so if your servers are **claude.ai connectors** (Gmail, Drive, Canva…) or come from **plugins**, it said "none." It now surfaces those too (turn on *Include servers from ~/.claude.json*).
-- **Fixed a freeze when opening a big non-git folder.** Opening something huge (like your whole home directory) made the file-watcher try to track *millions* of files and locked up the window. It now never recursively watches the home directory or filesystem roots, and caps watch depth — open anything you like, instantly.
-- **Smoother, comfier terminal** — smooth wheel scrolling, a calmer inactive cursor, a bit more line height and padding.
-- **munu is now a Dynamic Island.** It tucks into the notch and **slides down when your cursor goes to the top of the screen**, peeks for a few seconds whenever Claude's state changes, and **stays out the whole time Claude needs you** (so you never miss a `[y/n]`). Pointing at it keeps it open. Works on every platform (slides from the top edge where there's no notch).
-- **Icon-only & cuter** munu (no text labels — the animation/glow says it all), a **smaller permission card**, and better visibility over fullscreen apps.
+- **Pick any option from munu.** When Claude asks — yes/no *or* a multi-option choice ("restore which checkpoint?", etc.) — munu now shows **every** option as a button. Click one and it's selected in the terminal for you, so you don't have to tab back to choose.
+- **munu shows over fullscreen apps now.** Hovering the notch (or any state change) reveals munu even while you're in a fullscreen browser or editor — the earlier release could miss that. munu is also a bit bigger and easier to read.
 
 ---
 

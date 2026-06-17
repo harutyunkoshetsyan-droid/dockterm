@@ -8,19 +8,32 @@ export type MunuState = 'idle' | 'working' | 'asking' | 'done'
 export interface AskInfo {
   /** cleaned question/command context (box-drawing stripped), if any */
   title: string | null
-  /** the menu option labels, in order (without the numbers) */
+  /** the menu option labels, in order (numbers + checkbox markers stripped) */
   options: string[]
   /** true only for a clear Yes/No confirm — the only case we offer [y]/[n] */
   binary: boolean
+  /** true for a checkbox prompt where several options can be toggled before submit */
+  multiSelect: boolean
+  /** per-option: whether it's a toggleable checkbox (vs an action row like Submit) */
+  checkable: boolean[]
+  /** per-option: initial checked state (multi-select only) */
+  checked: boolean[]
+  /** index of the "Submit" row in `options`, or null */
+  submitIndex: number | null
 }
 /** A pane that is waiting for the user's permission. */
 export interface MunuAsk extends AskInfo {
   leafId: string
   tabId: string
+  /** true when the user can currently see this pane (its window is focused and
+   * its tab is active) — the overlay then suppresses the option card. */
+  visible: boolean
 }
 export interface MunuGlobal {
   state: MunuState
   asks: MunuAsk[]
+  /** The reporting window's active tab id (used to compute ask visibility). */
+  activeTabId?: string
 }
 export type MunuSettings = {
   enabled: boolean

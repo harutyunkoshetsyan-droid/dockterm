@@ -59,6 +59,30 @@ describe('parseAsk', () => {
     expect(ask.options).toHaveLength(0)
   })
 
+  it('marks an ordinary numbered menu as non-multi-select', () => {
+    const ask = parseAsk('Restore which checkpoint?\n❯ 1. a\n  2. b')!
+    expect(ask.multiSelect).toBe(false)
+    expect(ask.submitIndex).toBeNull()
+    expect(ask.checkable).toEqual([false, false])
+  })
+
+  it('parses a checkbox multi-select prompt with a Submit row', () => {
+    const text = [
+      'Pick any of these (multi-select).',
+      '❯ 1. [ ] Option A',
+      '  2. [x] Option B',
+      '  Submit',
+      '  3. [ ] Type something'
+    ].join('\n')
+    const ask = parseAsk(text)!
+    expect(ask.multiSelect).toBe(true)
+    expect(ask.binary).toBe(false)
+    expect(ask.options).toEqual(['Option A', 'Option B', 'Submit', 'Type something'])
+    expect(ask.checkable).toEqual([true, true, false, true])
+    expect(ask.checked).toEqual([false, true, false, false])
+    expect(ask.submitIndex).toBe(2)
+  })
+
   it('returns null when not asking', () => {
     expect(parseAsk('just output')).toBeNull()
   })

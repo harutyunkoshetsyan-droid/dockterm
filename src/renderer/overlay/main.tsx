@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Munu } from '@renderer/components/munu/Munu'
-import type { MunuGlobal, MunuState } from '@shared/types'
+import type { MunuAsk, MunuGlobal, MunuState } from '@shared/types'
 import { playAsk, playDone } from './sounds'
 import './overlay.css'
 
 const setInteractive = (v: boolean): void => {
   void window.dockterm.invoke('munu:setInteractive', { interactive: v })
 }
-const answer = (index: number): void => {
-  void window.dockterm.invoke('munu:answer', { index })
+const sendAnswer = (leafId: string, indices: number[], multi: boolean): void => {
+  void window.dockterm.invoke('munu:answer', { leafId, indices, multi })
 }
 const focus = (): void => {
   void window.dockterm.invoke('munu:focus', undefined)
@@ -20,7 +20,10 @@ function Overlay() {
   const [sounds, setSounds] = useState(true)
   const [platform, setPlatform] = useState('')
   const [revealed, setRevealed] = useState(false)
+  const [selected, setSelected] = useState<Set<number>>(new Set())
   const prev = useRef<MunuState>('idle')
+  const islandRef = useRef<HTMLDivElement | null>(null)
+  const lastSize = useRef({ w: 0, h: 0 })
 
   useEffect(() => window.dockterm.on('munu:state', setG), [])
   useEffect(() => window.dockterm.on('munu:reveal', setRevealed), [])
@@ -44,13 +47,64 @@ function Overlay() {
   }, [g.state, sounds])
 
   const asking = g.state === 'asking'
-  const ask = g.asks[0]
-  const options = ask?.options ?? []
-  const showCard = asking && options.length > 0
+  // Surface the first ask the user CAN'T currently see; if every asking pane is
+  // on-screen, there's nothing to pop (states/sounds still fire — just no card).
+  const primary: MunuAsk | undefined = g.asks.find((a) => !a.visible) ?? g.asks[0]
+  const options = primary?.options ?? []
+  const showCard = asking && !!primary && !primary.visible && options.length > 0
+
+  // Reset the multi-select toggles to the prompt's initial checked state whenever
+  // the surfaced ask changes.
+  useEffect(() => {
+    if (!primary) return
+    const init = new Set<number>()
+    primary.checked.forEach((c, i) => {
+      if (c && primary.checkable[i]) init.add(i)
+    })
+    setSelected(init)
+  }, [primary?.leafId, options.length])
+
+  // Measure the rendered content and ask main to size the floating window to fit
+  // it exactly — small when it fits small, taller when there are many options.
+  useEffect(() => {
+    const el = islandRef.current
+    if (!el) return
+    const pad = platform === 'darwin' ? 34 : 6
+    const measure = (): void => {
+      const w = Math.ceil(el.offsetWidth) + 44
+      const h = Math.ceil(el.offsetHeight) + pad + 44
+      if (Math.abs(w - lastSize.current.w) < 2 && Math.abs(h - lastSize.current.h) < 2) return
+      lastSize.current = { w, h }
+      void window.dockterm.invoke('munu:resize', { width: w, height: h })
+    }
+    let raf = 0
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(measure)
+    })
+    ro.observe(el)
+    measure()
+    return () => {
+      ro.disconnect()
+      cancelAnimationFrame(raf)
+    }
+  }, [platform, showCard])
+
+  const toggle = (i: number) => (): void =>
+    setSelected((s) => {
+      const n = new Set(s)
+      if (n.has(i)) n.delete(i)
+      else n.add(i)
+      return n
+    })
+
+  const isSubmitRow = (i: number): boolean =>
+    primary?.submitIndex === i || (primary?.multiSelect === true && /^submit\b/i.test(options[i] ?? ''))
 
   return (
     <div className={`ov ov--${platform}${revealed ? ' ov--revealed' : ' ov--hidden'}`}>
       <div
+        ref={islandRef}
         className={`island island--${g.state}${showCard ? ' island--card' : ''}`}
         onMouseEnter={() => setInteractive(true)}
         onMouseLeave={() => setInteractive(false)}
@@ -60,25 +114,57 @@ function Overlay() {
         title="munu"
       >
         <Munu state={g.state} size={showCard ? 34 : 48} />
-        {showCard && (
-          <div className="island__card">
-            {ask?.title && <div className="island__title">{ask.title}</div>}
+        {showCard && primary && (
+          <div className={`island__card${primary.multiSelect ? ' island__card--multi' : ''}`}>
+            {primary.title && <div className="island__title">{primary.title}</div>}
             <div className="island__opts">
-              {options.map((opt, i) => (
-                <button
-                  key={i}
-                  className={`ob${i === 0 ? ' ob--first' : ''}`}
-                  title={opt}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    answer(i)
-                  }}
-                >
-                  <span className="num">{i + 1}</span>
-                  <span className="lbl">{opt}</span>
-                </button>
-              ))}
+              {options.map((opt, i) => {
+                // Multi-select checkbox row: toggle locally, submit later.
+                if (primary.multiSelect && primary.checkable[i]) {
+                  const on = selected.has(i)
+                  return (
+                    <button
+                      key={i}
+                      className={`ob ob--check${on ? ' ob--on' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggle(i)()
+                      }}
+                    >
+                      <span className="box">{on ? '✓' : ''}</span>
+                      <span className="lbl">{opt}</span>
+                    </button>
+                  )
+                }
+                // Submit row → send the toggled set. Other rows → pick directly.
+                const submit = isSubmitRow(i)
+                return (
+                  <button
+                    key={i}
+                    className={`ob${!primary.multiSelect && i === 0 ? ' ob--first' : ''}${submit ? ' ob--submit' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (submit) sendAnswer(primary.leafId, [...selected], true)
+                      else sendAnswer(primary.leafId, [i], false)
+                    }}
+                  >
+                    {!primary.multiSelect && <span className="num">{i + 1}</span>}
+                    <span className="lbl">{opt}</span>
+                  </button>
+                )
+              })}
             </div>
+            {primary.multiSelect && primary.submitIndex == null && (
+              <button
+                className="ob ob--submit"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  sendAnswer(primary.leafId, [...selected], true)
+                }}
+              >
+                Submit {selected.size > 0 ? `(${selected.size})` : ''}
+              </button>
+            )}
             <button
               className="ob ob--open"
               onClick={(e) => {

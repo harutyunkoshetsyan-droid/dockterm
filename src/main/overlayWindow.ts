@@ -110,3 +110,17 @@ export function repositionOverlay(): void {
   const { x, y } = topCenter()
   overlay.setPosition(x, y)
 }
+
+/**
+ * Resize the floating window to fit its content (the renderer measures it) so
+ * munu's card is shown fully — small when it fits small, taller when there are
+ * many options. Clamped to the display so it can never run off-screen.
+ */
+export function resizeOverlay(width: number, height: number): void {
+  if (!overlay || overlay.isDestroyed()) return
+  const d = screen.getPrimaryDisplay()
+  const w = Math.min(Math.max(width, 120), d.workArea.width - 16)
+  const h = Math.min(Math.max(height, 80), d.bounds.height - 24)
+  const x = Math.round(d.bounds.x + (d.bounds.width - w) / 2)
+  overlay.setBounds({ x, y: d.bounds.y, width: Math.round(w), height: Math.round(h) })
+}

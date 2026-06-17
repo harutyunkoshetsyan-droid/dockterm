@@ -11,19 +11,32 @@ import { paneWriters } from '../../state/paneWriters'
 export function useMunuBridge(): void {
   const panes = useMunuStore((s) => s.panes)
   const done = useMunuStore((s) => s.done)
+  const activeId = useWorkspaceStore((s) => s.activeId)
 
-  // Report this window's aggregate whenever it changes.
+  // Report this window's aggregate whenever its state, active tab, or focus
+  // changes — focus/active-tab affect whether each ask is currently visible.
   useEffect(() => {
-    void window.dockterm.invoke('munu:report', useMunuStore.getState().snapshot())
-  }, [panes, done])
+    const report = (): void => {
+      void window.dockterm.invoke(
+        'munu:report',
+        useMunuStore.getState().snapshot(useWorkspaceStore.getState().activeId, document.hasFocus())
+      )
+    }
+    report()
+    window.addEventListener('focus', report)
+    window.addEventListener('blur', report)
+    return () => {
+      window.removeEventListener('focus', report)
+      window.removeEventListener('blur', report)
+    }
+  }, [panes, done, activeId])
 
-  // The overlay asked to pick option `index` in the asking pane's menu. Claude's
-  // menu highlights option 0 by default, so move down `index` times then Enter —
-  // this works for yes/no and multi-choice prompts alike.
+  // The overlay answered the asking pane's menu; main synthesized the exact key
+  // sequence (arrow nav / checkbox toggles / Enter) — just write it to the pane.
   useEffect(
     () =>
-      window.dockterm.on('munu:doAnswer', ({ leafId, index }) => {
-        paneWriters.write(leafId, '\x1b[B'.repeat(Math.max(0, index)) + '\r')
+      window.dockterm.on('munu:doAnswer', ({ leafId, keys }) => {
+        paneWriters.write(leafId, keys)
       }),
     []
   )

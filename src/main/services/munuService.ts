@@ -6,6 +6,7 @@ import {
   destroyOverlay,
   getOverlay,
   reassertOverlayLevel,
+  resizeOverlay,
   setOverlayInteractive as setOverlayClickThrough
 } from '../overlayWindow'
 import type { MunuAsk, MunuGlobal, MunuState } from '@shared/types'
@@ -39,9 +40,13 @@ function pollReveal(): void {
   // floating over fullscreen even after you switch into a fullscreen Space —
   // macOS can silently drop that membership on a Space change.
   if (++pollTicks % 20 === 0) reassertOverlayLevel()
-  // Always reveal while Claude needs you (don't miss it); otherwise reveal on
-  // hover or during a post-state-change peek.
-  const want = lastGlobalState === 'asking' || inRevealZone() || Date.now() < peekUntil
+  // Keep munu revealed while there's an ask the user CAN'T currently see (its
+  // pane is on a background tab/window). When the asking pane is on-screen we
+  // don't force it down — a brief peek + sound on the state change is enough.
+  const hasUnseenAsk = [...windowStates.values()].some((g) =>
+    g.asks.some((a) => !a.visible)
+  )
+  const want = hasUnseenAsk || inRevealZone() || Date.now() < peekUntil
   if (want !== revealed) {
     revealed = want
     // Re-assert all-spaces/always-on-top right before showing, so munu appears
@@ -96,20 +101,72 @@ function pushGlobal(): void {
   maybeNotify(global.state)
 }
 
-/** The window + first asking pane (used to route answers / focus). */
+/** The window + first asking pane (used to route focus). Prefers an ask the
+ * user can't currently see — that's the one the overlay surfaces. */
 function ownerOfPrimaryAsk(): { wc: Electron.WebContents; ask: MunuAsk } | null {
+  let fallback: { wc: Electron.WebContents; ask: MunuAsk } | null = null
   for (const [wcId, g] of windowStates) {
-    if (g.state === 'asking' && g.asks[0]) {
+    const ask = g.asks.find((a) => !a.visible) ?? g.asks[0]
+    if (g.state === 'asking' && ask) {
       const wc = webContents.fromId(wcId)
-      if (wc && !wc.isDestroyed()) return { wc, ask: g.asks[0] }
+      if (wc && !wc.isDestroyed()) {
+        const hit = { wc, ask }
+        if (!ask.visible) return hit
+        fallback ??= hit
+      }
+    }
+  }
+  return fallback
+}
+
+/** The window + ask for a specific pane (used to route answers exactly). */
+function ownerByLeaf(leafId: string): { wc: Electron.WebContents; ask: MunuAsk } | null {
+  for (const [wcId, g] of windowStates) {
+    const ask = g.asks.find((a) => a.leafId === leafId)
+    if (ask) {
+      const wc = webContents.fromId(wcId)
+      if (wc && !wc.isDestroyed()) return { wc, ask }
     }
   }
   return null
 }
 
-export function answerMunu(index: number): void {
-  const o = ownerOfPrimaryAsk()
-  if (o) o.wc.send('munu:doAnswer', { leafId: o.ask.leafId, index })
+/** Arrow-key keystrokes to move the menu cursor from row `from` to row `to`. */
+function move(from: number, to: number): string {
+  const d = to - from
+  return (d >= 0 ? '\x1b[B' : '\x1b[A').repeat(Math.abs(d))
+}
+
+/** Synthesize the key sequence that selects the user's answer in Claude's menu. */
+function keysForAnswer(ask: MunuAsk, indices: number[], multi: boolean): string {
+  if (!multi) {
+    return '\x1b[B'.repeat(Math.max(0, indices[0] ?? 0)) + '\r'
+  }
+  // Multi-select: toggle (Space) each checkbox whose desired state differs from
+  // its initial state, walking the cursor between rows, then move to Submit + Enter.
+  const desired = new Set(indices)
+  const toggles: number[] = []
+  ask.options.forEach((_, i) => {
+    if (ask.checkable[i] && desired.has(i) !== !!ask.checked[i]) toggles.push(i)
+  })
+  let cur = 0
+  let out = ''
+  for (const t of toggles) {
+    out += move(cur, t) + ' '
+    cur = t
+  }
+  const submit = ask.submitIndex ?? ask.options.length - 1
+  out += move(cur, submit) + '\r'
+  return out
+}
+
+export function answerMunu(leafId: string, indices: number[], multi: boolean): void {
+  const o = ownerByLeaf(leafId)
+  if (o) o.wc.send('munu:doAnswer', { leafId, keys: keysForAnswer(o.ask, indices, multi) })
+}
+
+export function resizeMunu(width: number, height: number): void {
+  resizeOverlay(width, height)
 }
 
 export function focusMunu(): void {

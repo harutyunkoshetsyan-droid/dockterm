@@ -1,21 +1,41 @@
 import { z } from 'zod'
 import { ok } from '@shared/result'
-import { reportMunu, answerMunu, focusMunu, setMunuInteractive } from '../../services/munuService'
+import {
+  reportMunu,
+  answerMunu,
+  focusMunu,
+  setMunuInteractive,
+  resizeMunu
+} from '../../services/munuService'
 import type { Registrar } from '../register'
 
 const askSchema = z.object({
   leafId: z.string(),
   tabId: z.string(),
   title: z.string().nullable(),
-  options: z.array(z.string()).max(16),
-  binary: z.boolean()
+  options: z.array(z.string()).max(32),
+  binary: z.boolean(),
+  multiSelect: z.boolean(),
+  checkable: z.array(z.boolean()).max(32),
+  checked: z.array(z.boolean()).max(32),
+  submitIndex: z.number().int().min(0).max(32).nullable(),
+  visible: z.boolean()
 })
 const reportSchema = z.object({
   state: z.enum(['idle', 'working', 'asking', 'done']),
-  asks: z.array(askSchema).max(64)
+  asks: z.array(askSchema).max(64),
+  activeTabId: z.string().optional()
 })
-const answerSchema = z.object({ index: z.number().int().min(0).max(32) })
+const answerSchema = z.object({
+  leafId: z.string(),
+  indices: z.array(z.number().int().min(0).max(32)).max(32),
+  multi: z.boolean()
+})
 const interactiveSchema = z.object({ interactive: z.boolean() })
+const resizeSchema = z.object({
+  width: z.number().int().min(40).max(4000),
+  height: z.number().int().min(40).max(4000)
+})
 
 export function registerMunuHandlers(reg: Registrar): void {
   reg('munu:report', reportSchema, (req, event) => {
@@ -24,7 +44,7 @@ export function registerMunuHandlers(reg: Registrar): void {
   })
 
   reg('munu:answer', answerSchema, (req) => {
-    answerMunu(req.index)
+    answerMunu(req.leafId, req.indices, req.multi)
     return ok(undefined)
   })
 
@@ -35,6 +55,11 @@ export function registerMunuHandlers(reg: Registrar): void {
 
   reg('munu:setInteractive', interactiveSchema, (req) => {
     setMunuInteractive(req.interactive)
+    return ok(undefined)
+  })
+
+  reg('munu:resize', resizeSchema, (req) => {
+    resizeMunu(req.width, req.height)
     return ok(undefined)
   })
 }

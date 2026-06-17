@@ -16,8 +16,9 @@ interface MunuStore {
   setPaneStatus: (leafId: string, tabId: string, state: ClaudeState, ask: AskInfo | null) => void
   removePane: (leafId: string) => void
   munuState: () => MunuState
-  /** This window's aggregate + asking panes, for reporting to main. */
-  snapshot: () => MunuGlobal
+  /** This window's aggregate + asking panes, for reporting to main. `activeTabId`
+   * + `focused` let each ask carry whether the user can currently see it. */
+  snapshot: (activeTabId: string, focused: boolean) => MunuGlobal
 }
 
 const SETTLE_MS = 3000
@@ -67,7 +68,7 @@ export const useMunuStore = create<MunuStore>((set, get) => ({
     return aggregate(states)
   },
 
-  snapshot: () => {
+  snapshot: (activeTabId, focused) => {
     const { panes } = get()
     const asks: MunuAsk[] = Object.entries(panes)
       .filter(([, p]) => p.state === 'asking')
@@ -76,8 +77,13 @@ export const useMunuStore = create<MunuStore>((set, get) => ({
         tabId: p.tabId,
         title: p.ask?.title ?? null,
         options: p.ask?.options ?? [],
-        binary: p.ask?.binary ?? false
+        binary: p.ask?.binary ?? false,
+        multiSelect: p.ask?.multiSelect ?? false,
+        checkable: p.ask?.checkable ?? [],
+        checked: p.ask?.checked ?? [],
+        submitIndex: p.ask?.submitIndex ?? null,
+        visible: focused && p.tabId === activeTabId
       }))
-    return { state: get().munuState(), asks }
+    return { state: get().munuState(), asks, activeTabId }
   }
 }))

@@ -214,9 +214,13 @@ export interface InvokeChannels {
 
   // munu — each window reports its aggregate; the overlay drives answers/focus.
   'munu:report': (req: MunuGlobal) => Result<void>
-  'munu:answer': (req: { index: number }) => Result<void>
+  /** Answer the asking pane `leafId`: `indices` are the chosen option(s) — a
+   * single element for single-select, the desired checked set for multi-select. */
+  'munu:answer': (req: { leafId: string; indices: number[]; multi: boolean }) => Result<void>
   'munu:focus': (req: void) => Result<void>
   'munu:setInteractive': (req: { interactive: boolean }) => Result<void>
+  /** The overlay's content size changed — resize the floating window to fit. */
+  'munu:resize': (req: { width: number; height: number }) => Result<void>
 }
 
 export interface EventChannels {
@@ -228,8 +232,9 @@ export interface EventChannels {
   'munu:state': MunuGlobal
   /** main → overlay: reveal (slide down) or hide (tuck into the notch). */
   'munu:reveal': boolean
-  /** main → the window owning an asking pane: select option `index` in the menu. */
-  'munu:doAnswer': { leafId: string; index: number }
+  /** main → the window owning an asking pane: the exact key sequence to write
+   * (arrow navigation / checkbox toggles / Enter), synthesized in main. */
+  'munu:doAnswer': { leafId: string; keys: string }
   /** main → the window owning an asking pane: focus that pane. */
   'munu:doFocus': { tabId: string; leafId: string }
 }
@@ -294,7 +299,8 @@ export const INVOKE_CHANNELS: readonly InvokeChannel[] = [
   'munu:report',
   'munu:answer',
   'munu:focus',
-  'munu:setInteractive'
+  'munu:setInteractive',
+  'munu:resize'
 ]
 
 /** Runtime allowlist mirrored from `EventChannels`. */

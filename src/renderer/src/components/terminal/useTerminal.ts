@@ -2,6 +2,7 @@ import { useEffect, useRef, type RefObject } from 'react'
 import type { ClaudeState } from './claudeStatus'
 import type { AskInfo } from '@shared/types'
 import { useThemeStore } from '../../state/useThemeStore'
+import { DEFAULT_MONO } from './terminalTheme'
 import { acquireTerminal, disposeTerminal, type PooledTerminal } from './terminalPool'
 
 export interface TerminalOptions {
@@ -77,7 +78,7 @@ export function useTerminal(options: TerminalOptions): TerminalHandle {
     const term = poolRef.current?.term
     if (!term) return
     term.options.fontSize = options.fontSize ?? 13
-    term.options.fontFamily = options.fontFamily ?? undefined
+    term.options.fontFamily = options.fontFamily ?? DEFAULT_MONO
     term.options.cursorStyle = options.cursorStyle ?? 'block'
     term.options.cursorBlink = options.cursorBlink ?? true
   }, [options.fontSize, options.fontFamily, options.cursorStyle, options.cursorBlink])

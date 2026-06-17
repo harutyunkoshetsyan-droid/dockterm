@@ -3,12 +3,13 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v0.14.0 — splitting never kills your session
+## 🎯 What's new in v0.15.0 — munu that fits, and the right font back
 
-- **Split or build a grid without losing Claude.** Terminals now live independently of the layout, so splitting a pane, making a grid, or closing a sibling no longer restarts your running shells — your Claude session keeps going.
-- **Native-feeling scrolling.** Removed the scroll animation that fought the trackpad — scrolling is now instant and smooth like a normal terminal.
-- **Clicked paths jump to the exact line.** Click `src/server.ts:42` in the output and DockTerm opens the file *and* scrolls to line 42.
-- **munu over fullscreen, improved.** Better at staying visible (and re-appearing) over fullscreen apps.
+- **Fixed the terminal font.** A v0.14.0 regression dropped the bundled mono font; it's restored, so the terminal reads cleanly again.
+- **munu's card fits perfectly.** The floating card now sizes itself to its content — small for a quick Yes/No, taller when there are many options — and the full question + every option are shown (no more clipped text).
+- **Multi-select prompts.** When Claude offers a checkbox (multi-select) menu, munu shows real toggles and a Submit button so you can pick several and submit.
+- **Only pops when you can't see it.** The option card only appears when the asking terminal is on a background tab or window — when you're already looking at it, munu just animates + chimes without getting in the way.
+- **Splits/grids still keep your session, native scrolling, click-to-line** (from v0.14.0).
 
 ---
 

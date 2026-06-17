@@ -3,11 +3,12 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🫧 What's new in v0.9.1 — just munu
+## 🌀 What's new in v0.10.0 — munu, the Dynamic Island
 
-- **The floating munu is now icon-only** — no more "resting / working… / needs you" text. munu's animation says it all: it gently floats at rest, bobs in violet while Claude works, glows **amber** when it needs you, and does a happy green hop with a cute **"all done ✨"** chime when the job finishes.
-- When Claude asks a real yes/no, munu docks onto a tidy card with the command and **[y] yes / [n] no / open**; any other prompt just glows and clicking it takes you to the terminal.
-- **Removed the little munu in the top bar** — it was redundant now that munu floats above everything (and shows in the dock icon).
+- **munu now lives in the notch.** It tucks away by default and **slides down when you move your cursor to the top of the screen** — like a Dynamic Island. It also **peeks for a few seconds whenever Claude's state changes** (so a glance catches "done" or "needs you"), and stays put while you point at it. When Claude needs a decision, it stays out until you handle it. This works on every platform (on non-notch Macs / Windows / Linux it slides from the top-center edge).
+- **Icon-only & cuter** — no more text labels; munu's animation and glow tell the story (violet working, amber needs-you, green all-done with a little chime).
+- **Smaller, tidier permission card**, and the redundant top-bar munu is gone.
+- Better visibility over fullscreen apps.
 
 ---
 

@@ -1,9 +1,12 @@
 <p align="center">
-  <img src="docs/screenshots/hero.png" alt="DockTerm — the calm, terminal-first workspace for Claude Code" width="820">
+  <img src="assets/brand/munu.svg" alt="munu" width="140">
 </p>
 
+<h1 align="center">DockTerm</h1>
+
 <p align="center">
-  <b>Run <code>claude</code>. munu watches it for you — files, Git, diffs &amp; MCP appear only when you need them.</b><br>
+  <b>The calm, terminal-first workspace for Claude Code.</b><br>
+  Run <code>claude</code>. munu watches it for you — files, Git, diffs &amp; MCP appear only when you need them.<br>
   <sub>No telemetry. No accounts. No cloud. Not opt-out — just absent.</sub>
 </p>
 

@@ -108,13 +108,12 @@ function createPooled(id: string, opts: TerminalOptions): PooledTerminal {
     rescaleOverlappingGlyphs: true,
     theme: useThemeStore.getState().xterm,
     fontWeightBold: '600',
-    // Native-style scrolling: instant, no easing. An animated scroll
-    // (smoothScrollDuration > 0) eases each wheel delta into a "slow then fast"
-    // curve — that's the non-native feel we explicitly avoid. macOS / Linux /
-    // Windows terminals scroll the buffer directly and let the OS handle trackpad
-    // momentum, so we match that with a fixed line step per wheel notch.
-    smoothScrollDuration: 0,
-    scrollSensitivity: 1,
+    // Scrolling tuned to feel like a modern Linux terminal (gnome-terminal /
+    // konsole): a short smooth glide so it isn't janky, and a fast step per wheel
+    // notch so it covers ground quickly. fastScroll (Alt) multiplies on top.
+    // Tunable — raise scrollSensitivity for faster, lower for calmer.
+    smoothScrollDuration: 90,
+    scrollSensitivity: 3,
     fastScrollSensitivity: 5,
     // A touch more line height + a calm inactive cursor for comfort.
     cursorInactiveStyle: 'outline',

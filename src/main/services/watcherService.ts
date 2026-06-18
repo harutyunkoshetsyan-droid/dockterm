@@ -3,6 +3,7 @@ import os from 'node:os'
 import { relative, resolve, sep } from 'node:path'
 import type { BrowserWindow } from 'electron'
 import { IGNORED_ENTRIES, WATCH_DEBOUNCE_MS, SESSION_CHANGE_LOG_CAP } from '@shared/constants'
+import { exceedsWatchBudget, countDirsBounded } from './watchPolicy'
 import type { WatchEvent } from '@shared/ipc'
 
 /**
@@ -33,6 +34,12 @@ interface WindowWatch {
 
 const watches = new Map<number, WindowWatch>()
 
+// Retargets are debounced per window so rapid focus/cwd changes coalesce and the
+// heavy chokidar setup never runs on the terminal-create critical path.
+const RETARGET_DEBOUNCE_MS = 250
+const retargetTimers = new Map<number, ReturnType<typeof setTimeout>>()
+const pendingRoot = new Map<number, string>()
+
 function schedule(id: number): void {
   const w = watches.get(id)
   if (!w || w.timer) return
@@ -46,6 +53,12 @@ function schedule(id: number): void {
 }
 
 function closeWatch(id: number): void {
+  const t = retargetTimers.get(id)
+  if (t) {
+    clearTimeout(t)
+    retargetTimers.delete(id)
+  }
+  pendingRoot.delete(id)
   const w = watches.get(id)
   if (!w) return
   void w.watcher.close()
@@ -53,17 +66,40 @@ function closeWatch(id: number): void {
   watches.delete(id)
 }
 
-/** Point a window's watcher at `projectRoot` (replacing any existing one). */
+/** Point a window's watcher at `projectRoot` — debounced so rapid focus/cwd
+ * changes coalesce and the heavy chokidar setup never runs on the terminal
+ * create critical path. */
 export function retargetWatcher(win: BrowserWindow, projectRoot: string): void {
+  const id = win.webContents.id
+  const existing = watches.get(id)
+  if (existing && existing.root === projectRoot) return // already watching it
+  pendingRoot.set(id, projectRoot)
+  const prev = retargetTimers.get(id)
+  if (prev) clearTimeout(prev)
+  retargetTimers.set(
+    id,
+    setTimeout(() => {
+      retargetTimers.delete(id)
+      const root = pendingRoot.get(id)
+      pendingRoot.delete(id)
+      if (root && !win.isDestroyed()) applyRetarget(win, root)
+    }, RETARGET_DEBOUNCE_MS)
+  )
+}
+
+/** Replace a window's watcher with one rooted at `projectRoot` (the debounced
+ * worker behind retargetWatcher). */
+function applyRetarget(win: BrowserWindow, projectRoot: string): void {
   const id = win.webContents.id
   const existing = watches.get(id)
   if (existing && existing.root === projectRoot) return
   closeWatch(id)
 
-  // Never recursively watch the home dir / a filesystem root — it would walk
-  // millions of paths and hang the app. (The file tree still works; no live
-  // change events for such folders.)
+  // Never recursively watch the home dir / a filesystem root, nor a tree larger
+  // than the watch budget — either would walk a huge number of paths and stall
+  // the app. (The file tree still works; there are just no live change events.)
   if (isTooLargeToWatch(projectRoot)) return
+  if (exceedsWatchBudget(countDirsBounded(projectRoot))) return
 
   const watcher = watch(projectRoot, {
     ignoreInitial: true,

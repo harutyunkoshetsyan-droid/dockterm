@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Modal } from './Modal'
 import { Munu } from '../munu/Munu'
 import type { UpdateAvailable } from '@shared/ipc'
+import { useAppStore } from '../../state/useAppStore'
 
 type Phase = 'idle' | 'downloading' | 'done' | 'error'
 
@@ -54,6 +55,7 @@ function renderNotes(notes: string): ReactNode[] {
 }
 
 export function UpdatePopup() {
+  const character = useAppStore((s) => s.settings?.munu.character) ?? 'munu'
   const [info, setInfo] = useState<UpdateAvailable | null>(null)
   const [phase, setPhase] = useState<Phase>('idle')
   const [percent, setPercent] = useState(0)
@@ -100,7 +102,7 @@ export function UpdatePopup() {
     <Modal onClose={phase === 'downloading' ? close : remindLater}>
       <div className="update-pop">
         <div className="update-pop__head">
-          <Munu state="done" size={52} />
+          <Munu state="done" character={character} size={52} />
           <div>
             <div className="update-pop__title">DockTerm {info.latestVersion} is available</div>
             <div className="update-pop__sub">{sub}</div>

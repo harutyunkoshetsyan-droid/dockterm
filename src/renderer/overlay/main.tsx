@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Munu } from '@renderer/components/munu/Munu'
-import type { MunuAsk, MunuGlobal, MunuState } from '@shared/types'
+import type { MascotCharacter, MunuAsk, MunuGlobal, MunuState } from '@shared/types'
 import { playAsk, playDone } from './sounds'
 import './overlay.css'
 
@@ -37,6 +37,7 @@ function Overlay() {
   const [g, setG] = useState<MunuGlobal>({ state: 'idle', asks: [] })
   const [sounds, setSounds] = useState(true)
   const [munuSize, setMunuSize] = useState(56)
+  const [character, setCharacter] = useState<MascotCharacter>('munu')
   const [platform, setPlatform] = useState('')
   const [revealed, setRevealed] = useState(false)
   const [selected, setSelected] = useState<Set<number>>(new Set())
@@ -56,6 +57,7 @@ function Overlay() {
       if (r.ok) {
         setSounds(r.value.munu.sounds)
         setMunuSize(r.value.munu.size)
+        setCharacter(r.value.munu.character)
       }
     })
     void window.dockterm.invoke('app:getInfo', undefined).then((r) => {
@@ -64,6 +66,7 @@ function Overlay() {
     return window.dockterm.on('settings:changed', (s) => {
       setSounds(s.munu.sounds)
       setMunuSize(s.munu.size)
+      setCharacter(s.munu.character)
     })
   }, [])
 
@@ -210,7 +213,11 @@ function Overlay() {
         }}
         title="munu"
       >
-        <Munu state={g.state} size={showCard ? Math.round(munuSize * 0.75) : munuSize} />
+        <Munu
+          state={g.state}
+          character={character}
+          size={showCard ? Math.round(munuSize * 0.75) : munuSize}
+        />
         {showCard && primary && (
           <div className={`island__card${primary.multiSelect ? ' island__card--multi' : ''}`}>
             {primary.steps.length > 0 && (

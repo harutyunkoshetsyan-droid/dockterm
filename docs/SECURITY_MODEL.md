@@ -67,8 +67,9 @@ in **and** the panel requests it (a double gate, default off).
 ## Privacy
 
 No telemetry, analytics, or crash reporting exist in the code. At runtime the app
-makes no network calls except the git operations you initiate and the external
-links you click.
+makes no network calls except the git operations you initiate, the external links
+you click, and an optional check to GitHub for new releases (used for in-app
+updates; on by default and toggleable in Settings → "Check automatically").
 
 ## What we do not claim
 

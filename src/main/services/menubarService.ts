@@ -1,6 +1,7 @@
 import { app, Tray, Menu, BrowserWindow, globalShortcut, nativeImage } from 'electron'
 import { join } from 'node:path'
 import { createWindow } from '../window'
+import { getOverlay } from '../overlayWindow'
 
 let tray: Tray | null = null
 
@@ -8,7 +9,12 @@ let tray: Tray | null = null
 const HOTKEY = 'CommandOrControl+Shift+Backquote'
 
 function toggleVisibility(): void {
-  const wins = BrowserWindow.getAllWindows()
+  // The munu overlay manages its own visibility (always-on-top + CSS reveal, and
+  // stays put when pinned). Exclude it: it must never be hidden by the app toggle,
+  // and counting it — it's always "visible" — would otherwise skew the check below
+  // so the first toggle hides munu instead of summoning the real windows.
+  const ov = getOverlay()
+  const wins = BrowserWindow.getAllWindows().filter((w) => w !== ov)
   if (wins.length === 0) {
     createWindow()
     return

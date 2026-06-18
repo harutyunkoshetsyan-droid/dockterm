@@ -162,18 +162,18 @@ function TerminalPane({
             }}
             onDragEnd={clearDrag}
           >
-            <GripVertical size={12} />
+            <GripVertical size={14} />
           </button>
         )}
         <button title="Split right" onMouseDown={act(() => split('row'))}>
-          <SplitSquareHorizontal size={12} />
+          <SplitSquareHorizontal size={14} />
         </button>
         <button title="Split down" onMouseDown={act(() => split('col'))}>
-          <SplitSquareVertical size={12} />
+          <SplitSquareVertical size={14} />
         </button>
         {canClose && (
           <button title="Close pane" onMouseDown={act(() => closeFocused())}>
-            <X size={12} />
+            <X size={14} />
           </button>
         )}
       </div>

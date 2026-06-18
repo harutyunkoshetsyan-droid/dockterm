@@ -88,7 +88,10 @@ const preference = {
       attention: z.boolean().default(true),
       keepAwake: z.boolean().default(true),
       notifications: z.boolean().default(true),
-      size: z.number().int().min(36).max(120).default(56)
+      size: z.number().int().min(36).max(120).default(56),
+      character: z.enum(['munu', 'nvurd', 'guru', 'adanana']).default('munu'),
+      pinned: z.boolean().default(false),
+      position: z.object({ x: z.number(), y: z.number() }).nullable().default(null)
     })
     .default({})
 }

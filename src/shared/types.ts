@@ -15,6 +15,8 @@ export type ItemScope = 'project' | 'user' | 'plugin'
 
 /** munu (the mascot) state, aggregated across panes/windows. */
 export type MunuState = 'idle' | 'working' | 'asking' | 'done'
+/** Which mascot character the user has chosen. Default 'munu'. */
+export type MascotCharacter = 'munu' | 'nvurd' | 'guru' | 'adanana'
 /** A parsed Claude permission prompt. */
 export interface AskInfo {
   /** cleaned question/command context (box-drawing stripped), if any */
@@ -61,6 +63,12 @@ export type MunuSettings = {
   notifications: boolean
   /** Overlay munu face size in px (the notch pill). Default 56. */
   size: number
+  /** The chosen mascot character. Default 'munu'. */
+  character: MascotCharacter
+  /** When true, the icon stays visible and is draggable. Default false. */
+  pinned: boolean
+  /** Persisted screen position when pinned (top-left of the overlay window). */
+  position: { x: number; y: number } | null
 }
 
 export type AccentName = 'violet' | 'blue' | 'teal'

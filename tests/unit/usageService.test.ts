@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { parseUsageLine, buildSnapshot, prettyModel, type UsageRecord } from '@main/services/usageService'
+import {
+  parseUsageLine,
+  buildSnapshot,
+  computeWindow,
+  prettyModel,
+  type UsageRecord
+} from '@main/services/usageService'
 
 const line = (o: unknown): string => JSON.stringify(o)
 
@@ -100,5 +106,68 @@ describe('buildSnapshot', () => {
     expect(s.byModel.map((m) => m.label)).toEqual(['Sonnet', 'Opus'])
     expect(s.byProject[0]).toMatchObject({ label: 'b' })
     expect(s.byProject.find((p) => p.label === 'a')?.totalTokens).toBe(150)
+  })
+
+  it('exposes 5-hour and weekly windows in the snapshot', () => {
+    const s = buildSnapshot([rec({ ts: now - HOUR })], now)
+    expect(s.fiveHour.windowMs).toBe(5 * HOUR)
+    expect(s.weekly.windowMs).toBe(7 * DAY)
+    expect(s.fiveHour.percentLeft).toBeGreaterThanOrEqual(0)
+  })
+})
+
+describe('computeWindow', () => {
+  const now = Date.parse('2026-06-18T12:00:00.000Z')
+  const HOUR = 3_600_000
+  const FIVE_H = 5 * HOUR
+  const rec = (ts: number, tokens: number): UsageRecord => ({
+    id: `${ts}`,
+    ts,
+    model: 'Opus',
+    project: '/p',
+    projectLabel: 'p',
+    input: tokens,
+    output: 0,
+    cacheCreate: 0,
+    cacheRead: 0
+  })
+
+  it('reports % left and a real reset time for an active block', () => {
+    // 720 tokens used; floor limit 1000 → 72% used, 28% left.
+    const recs = [rec(now - 90 * 60_000, 400), rec(now - HOUR, 320)]
+    const w = computeWindow(recs, now, FIVE_H, 1000, 'hour')
+    expect(w.used).toBe(720)
+    expect(w.limit).toBe(1000)
+    expect(w.percentUsed).toBe(72)
+    expect(w.percentLeft).toBe(28)
+    expect(w.resetAt).not.toBeNull()
+    // resets at the block anchor (floored to the hour of first activity) + 5h
+    const anchor = new Date(now - 90 * 60_000)
+    anchor.setMinutes(0, 0, 0)
+    expect(w.resetAt).toBe(anchor.getTime() + FIVE_H)
+  })
+
+  it('is idle (100% left, no reset) when the last activity is older than the window', () => {
+    const w = computeWindow([rec(now - 6 * HOUR, 999)], now, FIVE_H, 1000, 'hour')
+    expect(w.used).toBe(0)
+    expect(w.percentLeft).toBe(100)
+    expect(w.resetAt).toBeNull()
+  })
+
+  it('calibrates the limit to the busiest past block', () => {
+    // A heavy past block (2000) sets the reference; the current block uses 500.
+    const recs = [rec(now - 10 * HOUR, 2000), rec(now - 30 * 60_000, 500)]
+    const w = computeWindow(recs, now, FIVE_H, 100, 'hour')
+    expect(w.used).toBe(500)
+    expect(w.limit).toBe(2000)
+    expect(w.percentUsed).toBe(25)
+    expect(w.percentLeft).toBe(75)
+  })
+
+  it('returns full headroom for no records', () => {
+    const w = computeWindow([], now, FIVE_H, 1000, 'hour')
+    expect(w.used).toBe(0)
+    expect(w.percentLeft).toBe(100)
+    expect(w.resetAt).toBeNull()
   })
 })

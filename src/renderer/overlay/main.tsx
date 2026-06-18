@@ -264,13 +264,25 @@ function Overlay() {
     setPopupOpen((o) => !o)
   }
 
+  // While the settings popup is open, keep munu revealed even if the cursor
+  // leaves the top reveal zone — otherwise reaching down to the popup would tuck
+  // munu (and the popup) away. (The Claude ask-card manages its own reveal, so
+  // this only applies when no card is showing.)
+  const shown = revealed || (popupOpen && !showCard)
+
   return (
-    <div className={`ov ov--${platform}${revealed ? ' ov--revealed' : ' ov--hidden'}`}>
+    <div className={`ov ov--${platform}${shown ? ' ov--revealed' : ' ov--hidden'}`}>
       <div
         ref={islandRef}
         className={`island island--${g.state}${showCard ? ' island--card' : ''}${pinned ? ' island--pinned' : ''}`}
         onMouseEnter={() => setInteractive(true)}
-        onMouseLeave={() => setInteractive(false)}
+        onMouseLeave={() => {
+          // Leaving the whole munu+popup area dismisses the popup, so an unpinned
+          // munu resumes its normal auto-tuck. Moving between munu and the popup
+          // stays inside .island, so this doesn't fire mid-interaction.
+          setInteractive(false)
+          setPopupOpen(false)
+        }}
       >
         <div
           className="island__munu"

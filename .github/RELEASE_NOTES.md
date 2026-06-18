@@ -3,11 +3,23 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v0.23.2 — hover an icon, see what it does
+## 🎯 What's new in v__VER__ — usage at a glance, native-feeling terminals, friends for munu
 
-- **Tooltips everywhere in the chrome.** Hover any top-bar or tab-bar icon and a small label tells you exactly what it does — no more guessing.
-- **Tidier toolbar.** "New window" now lives in the top bar next to "Open project," and the extra terminal icon is gone. The tab bar is just New terminal + grid.
-- Plus everything from v0.23.1: in-app downloads + install for "Update now," and a cleaner update popup.
+**See your Claude limits, live**
+- A new **Usage** panel (plus a compact top-bar pill) shows **how much of your 5-hour and weekly windows is left** and **when they reset** — not a wall of token counts. It updates live as you work.
+
+**Terminals that feel native**
+- **Smooth, native scrolling** — instant and consistent like Terminal.app / GNOME Terminal, with no laggy easing.
+- **The default shortcuts you already know:** New tab, New window, Close tab — ⌘T / ⌘N / ⌘W on macOS, and Ctrl+Shift+T / N / W on Windows & Linux.
+- **Rearrange your grid** — drag a pane by its grip onto another to swap their places; the running shells stay alive.
+- Split controls are **always within reach** on every pane, and dropping a **folder** onto a terminal now types its path (just like a file).
+
+**A fresh coat of paint**
+- New themes, including an Ubuntu-style **Aubergine** and **Gruvbox Dark**, plus a warmer **DockTerm Paper** light theme.
+
+**munu grows up**
+- New mascot characters to choose from, and you can now **pin munu and drag it anywhere** on screen — it stays visible wherever you put it.
+- **Linux fix:** munu now shows up reliably (it was landing off-position on some window managers).
 
 ---
 

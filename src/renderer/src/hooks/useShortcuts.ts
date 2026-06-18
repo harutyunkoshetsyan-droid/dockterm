@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useAppStore } from '../state/useAppStore'
 import { useEditorStore } from '../state/useEditorStore'
+import { useWorkspaceStore } from '../state/useWorkspaceStore'
 import type { PanelId } from '@shared/types'
 
 const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.userAgent)
@@ -43,6 +44,19 @@ export function useShortcuts(): void {
       if ((cmdOnly || ctrlShift) && key === 'j') return fire(() => app.toggleMiniTerm())
       if ((cmdOnly || ctrlShift) && key === 'o') return fire(() => void app.openProjectDialog())
 
+      // Native terminal tab/window shortcuts so users coming from Terminal.app,
+      // GNOME Terminal or Windows Terminal feel at home:
+      //   New tab    — ⌘T (mac) / Ctrl+Shift+T (win/linux)
+      //   New window — ⌘N (mac) / Ctrl+Shift+N (win/linux)
+      //   Close tab  — ⌘W (mac) / Ctrl+Shift+W (win/linux); see the 'w' block below.
+      if ((cmdOnly && key === 't') || (ctrlShift && key === 't')) {
+        const cwd = app.activeRoot || app.homeDir
+        if (cwd) return fire(() => useWorkspaceStore.getState().open(cwd))
+      }
+      if ((cmdOnly && key === 'n') || (ctrlShift && key === 'n')) {
+        return fire(() => void window.dockterm.invoke('window:new', undefined))
+      }
+
       // Command palette: Cmd/Ctrl+Shift+P, or Cmd+K (mac) / Ctrl+Shift+K (win)
       if ((withShift && key === 'p') || (cmdOnly && key === 'k') || (ctrlShift && key === 'k')) {
         return fire(() => app.setPaletteOpen(!app.paletteOpen))
@@ -62,12 +76,21 @@ export function useShortcuts(): void {
         if (key === '0') return fire(() => void app.setZoom(1))
       }
 
-      // Close editor tab (only when the editor is focused).
-      const closeCombo = isMac ? cmdOnly : e.ctrlKey && !e.shiftKey && !e.altKey
-      if (closeCombo && key === 'w') {
+      // Close — native: ⌘W (mac) / Ctrl+Shift+W (win/linux) closes the active
+      // terminal tab. When the editor is focused, its own close combo (⌘W on mac,
+      // Ctrl+W on win/linux) closes the editor tab instead. Plain Ctrl+W (no
+      // shift) is always left for the shell's delete-word.
+      if (key === 'w') {
         const inEditor = !!document.activeElement?.closest('.editor')
         const editor = useEditorStore.getState()
-        if (inEditor && editor.activePath) fire(() => editor.closeActive())
+        const editorClose = isMac ? cmdOnly : e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey
+        if (inEditor && editor.activePath && editorClose) {
+          return fire(() => editor.closeActive())
+        }
+        if (cmdOnly || ctrlShift) {
+          const ws = useWorkspaceStore.getState()
+          if (ws.activeId) return fire(() => ws.close(ws.activeId))
+        }
       }
     }
 

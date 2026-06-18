@@ -1,57 +1,49 @@
 import { useEffect } from 'react'
-import { Activity, RefreshCw } from 'lucide-react'
+import { Activity, RefreshCw, Clock } from 'lucide-react'
 import { useUsageStore } from '../../state/useUsageStore'
-import type { UsageTotals, UsageBucket } from '@shared/types'
-import { fmtTokens } from './format'
+import type { UsageWindow, UsageBucket } from '@shared/types'
+import { Ring } from './Ring'
+import { useNowTick } from './useNowTick'
+import { fmtTokens, fmtCountdown, fmtResetClock, toneColor } from './format'
 
-const SEG_COLORS = ['var(--accent)', 'var(--success)', 'var(--warning)', 'var(--text-faint)']
-const SEG_LABELS = ['Input', 'Output', 'Cache write', 'Cache read'] as const
-
-function parts(t: UsageTotals): number[] {
-  return [t.inputTokens, t.outputTokens, t.cacheCreateTokens, t.cacheReadTokens]
-}
-
-/** Composition donut for today's tokens, with the live total in the center. */
-function Donut({ total }: { total: UsageTotals }) {
-  const vals = parts(total)
-  const sum = vals.reduce((a, v) => a + v, 0) || 1
-  const R = 52
-  const C = 2 * Math.PI * R
-  let acc = 0
+/** Headline card for one rolling limit window: a ring of remaining headroom +
+ * when it resets. */
+function WindowCard({ title, w, now }: { title: string; w: UsageWindow; now: number }) {
+  const left = w.percentLeft
+  const tone = toneColor(left)
   return (
-    <div className="usage-donut">
-      <svg viewBox="0 0 130 130" width="118" height="118">
-        <circle cx="65" cy="65" r={R} className="usage-donut__track" fill="none" strokeWidth="13" />
-        {vals.map((v, i) => {
-          const frac = v / sum
-          const dash = `${frac * C} ${C}`
-          const off = -acc * C
-          acc += frac
-          return (
-            <circle
-              key={i}
-              cx="65"
-              cy="65"
-              r={R}
-              fill="none"
-              strokeWidth="13"
-              stroke={SEG_COLORS[i]}
-              strokeDasharray={dash}
-              strokeDashoffset={off}
-              transform="rotate(-90 65 65)"
-            />
-          )
-        })}
-      </svg>
-      <div className="usage-donut__center">
-        <div className="usage-donut__num">{fmtTokens(total.totalTokens)}</div>
-        <div className="usage-donut__cap">tokens today</div>
+    <div className="usage-win">
+      <Ring pct={left} size={104} stroke={10} color={tone}>
+        <div className="usage-win__pct" style={{ color: tone }}>
+          {left}%
+        </div>
+        <div className="usage-win__cap">left</div>
+      </Ring>
+      <div className="usage-win__meta">
+        <div className="usage-win__title">{title}</div>
+        {w.resetAt ? (
+          <div className="usage-win__reset">
+            <Clock size={12} /> Resets in <b>{fmtCountdown(w.resetAt - now)}</b>
+            <span className="usage-win__at">· {fmtResetClock(w.resetAt)}</span>
+          </div>
+        ) : (
+          <div className="usage-win__reset usage-win__reset--idle">
+            Fresh — resets once you start
+          </div>
+        )}
+        <div className="usage-win__track">
+          <span
+            className="usage-win__fill"
+            style={{ width: `${w.percentUsed}%`, background: tone }}
+          />
+        </div>
+        {w.auto && <div className="usage-win__note">Calibrated to your busiest window</div>}
       </div>
     </div>
   )
 }
 
-/** 30-day token area chart. */
+/** 30-day token trend (relative, not a running total). */
 function Spark({ daily }: { daily: UsageBucket[] }) {
   const vals = daily.map((d) => d.totalTokens)
   const max = Math.max(1, ...vals)
@@ -99,21 +91,10 @@ function Bars({ rows }: { rows: UsageBucket[] }) {
 export function UsagePanel() {
   const snap = useUsageStore((s) => s.snapshot)
   const load = useUsageStore((s) => s.load)
+  const now = useNowTick()
   useEffect(() => {
     void load()
   }, [load])
-
-  const stat = (label: string, t: UsageTotals) => (
-    <div className="usage-stat" key={label}>
-      <div className="usage-stat__val">{fmtTokens(t.totalTokens)}</div>
-      <div className="usage-stat__label">{label}</div>
-    </div>
-  )
-
-  const cacheEff = (t: UsageTotals): number => {
-    const base = t.inputTokens + t.cacheReadTokens
-    return base ? Math.round((t.cacheReadTokens / base) * 100) : 0
-  }
 
   return (
     <div className="panel">
@@ -129,50 +110,21 @@ export function UsagePanel() {
         {!snap || snap.empty ? (
           <div className="mcp-empty">
             <Activity size={15} /> No Claude usage yet. As you run Claude in DockTerm&apos;s
-            terminals, your token usage shows up here — live.
+            terminals, your remaining limits show up here — live.
           </div>
         ) : (
           <>
-            <div className="usage-hero">
-              <Donut total={snap.today} />
-              <div className="usage-legend">
-                {SEG_LABELS.map((label, i) => (
-                  <div className="usage-legend__row" key={label}>
-                    <span className="usage-legend__dot" style={{ background: SEG_COLORS[i] }} />
-                    <span className="usage-legend__label">{label}</span>
-                    <span className="usage-legend__val">{fmtTokens(parts(snap.today)[i])}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="usage-stats">
-              {stat('Last 5h', snap.last5h)}
-              {stat('7 days', snap.last7d)}
-              {stat('30 days', snap.last30d)}
-              {stat('All time', snap.allTime)}
-            </div>
+            <WindowCard title="5-hour limit" w={snap.fiveHour} now={now} />
+            <WindowCard title="Weekly limit" w={snap.weekly} now={now} />
 
             <div className="usage-section">
               <div className="usage-section__head">
-                <span>Last {snap.daily.length} days</span>
+                <span>Activity · last {snap.daily.length} days</span>
                 <span className="usage-live">
                   <span className="usage-live__dot" /> live
                 </span>
               </div>
               <Spark daily={snap.daily} />
-            </div>
-
-            <div className="usage-section">
-              <div className="usage-section__head">
-                <span>Cache efficiency · 30 days</span>
-              </div>
-              <div className="usage-cache">
-                <div className="usage-cache__pct">{cacheEff(snap.last30d)}%</div>
-                <div className="usage-cache__cap">
-                  of input tokens were served from cache — fewer fresh tokens to process.
-                </div>
-              </div>
             </div>
 
             {snap.byModel.length > 0 && (

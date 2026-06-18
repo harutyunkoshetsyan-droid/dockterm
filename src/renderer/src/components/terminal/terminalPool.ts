@@ -104,9 +104,15 @@ function createPooled(id: string, opts: TerminalOptions): PooledTerminal {
     macOptionIsMeta: true,
     theme: useThemeStore.getState().xterm,
     fontWeightBold: '600',
-    // No smoothScrollDuration: animating each wheel delta fights the OS trackpad
-    // momentum and feels laggy. Instant scroll matches native terminals. A touch
-    // more line height + a calm inactive cursor for comfort.
+    // Native-style scrolling: instant, no easing. An animated scroll
+    // (smoothScrollDuration > 0) eases each wheel delta into a "slow then fast"
+    // curve — that's the non-native feel we explicitly avoid. macOS / Linux /
+    // Windows terminals scroll the buffer directly and let the OS handle trackpad
+    // momentum, so we match that with a fixed line step per wheel notch.
+    smoothScrollDuration: 0,
+    scrollSensitivity: 1,
+    fastScrollSensitivity: 5,
+    // A touch more line height + a calm inactive cursor for comfort.
     cursorInactiveStyle: 'outline',
     lineHeight: 1.15
   })

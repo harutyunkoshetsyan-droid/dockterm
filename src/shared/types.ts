@@ -264,10 +264,31 @@ export interface UsageBucket extends UsageTotals {
   label: string
 }
 
+/** A rolling usage window (the 5-hour or weekly limit block): how much is used,
+ * the percentage left, and when the current block resets. */
+export interface UsageWindow {
+  /** window length in ms (5h or 7d). */
+  windowMs: number
+  /** tokens used in the current active block (0 when the window is idle). */
+  used: number
+  /** reference quota for the percentage, in tokens (auto-calibrated for now). */
+  limit: number
+  percentUsed: number
+  percentLeft: number
+  /** epoch ms when the active block resets, or null when the window is idle. */
+  resetAt: number | null
+  /** true when `limit` is auto-calibrated from history (no user-set quota). */
+  auto: boolean
+}
+
 /** Aggregated, tokens-only view of local Claude Code usage (from ~/.claude
  * transcripts), computed relative to a moment in time. */
 export interface UsageSnapshot {
   updatedAt: number
+  /** rolling 5-hour limit window (the headline). */
+  fiveHour: UsageWindow
+  /** rolling weekly limit window. */
+  weekly: UsageWindow
   today: UsageTotals
   last5h: UsageTotals
   last7d: UsageTotals

@@ -2,7 +2,7 @@ import { BrowserWindow } from 'electron'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { readdir, stat, open } from 'node:fs/promises'
-import type { UsageSnapshot, UsageTotals, UsageBucket } from '@shared/types'
+import type { UsageSnapshot, UsageTotals, UsageBucket, UsageWindow } from '@shared/types'
 
 /**
  * Live, tokens-only view of local Claude Code usage.
@@ -132,6 +132,72 @@ function dayLabel(ms: number): string {
   return `${`${d.getMonth() + 1}`.padStart(2, '0')}/${`${d.getDate()}`.padStart(2, '0')}`
 }
 
+function recTokens(r: UsageRecord): number {
+  return r.input + r.output + r.cacheCreate + r.cacheRead
+}
+
+function floorTo(ms: number, unit: 'hour' | 'day'): number {
+  const d = new Date(ms)
+  d.setMinutes(0, 0, 0)
+  if (unit === 'day') d.setHours(0, 0, 0, 0)
+  return d.getTime()
+}
+
+/**
+ * Model one rolling usage window (the way Claude's limits behave): group activity
+ * into fixed blocks that anchor at the first message and run for `windowMs`, with
+ * a fresh block after a gap longer than the window. The current block's reset is
+ * `anchor + windowMs` (a real time, not a guess). Since the plan's true token
+ * quota isn't knowable from disk, the percentage is measured against an
+ * auto-calibrated `limit` = the busiest comparable past block (which ≈ the real
+ * quota once you've ever hit your rate limit), floored so a brand-new user isn't
+ * pinned at 100%. Pure / unit-testable.
+ */
+export function computeWindow(
+  records: UsageRecord[],
+  now: number,
+  windowMs: number,
+  floorLimit: number,
+  anchorUnit: 'hour' | 'day'
+): UsageWindow {
+  const sorted = records.filter((r) => r.ts > 0).sort((a, b) => a.ts - b.ts)
+  interface Block {
+    anchor: number
+    lastTs: number
+    used: number
+  }
+  const blocks: Block[] = []
+  let cur: Block | null = null
+  for (const r of sorted) {
+    if (!cur || r.ts - cur.anchor >= windowMs || r.ts - cur.lastTs >= windowMs) {
+      cur = { anchor: floorTo(r.ts, anchorUnit), lastTs: r.ts, used: 0 }
+      blocks.push(cur)
+    }
+    cur.used += recTokens(r)
+    cur.lastTs = r.ts
+  }
+  const last = blocks[blocks.length - 1]
+  const active = !!last && now < last.anchor + windowMs
+  const used = active ? last!.used : 0
+  const resetAt = active ? last!.anchor + windowMs : null
+  let peak = 0
+  for (let i = 0; i < blocks.length; i++) {
+    if (active && i === blocks.length - 1) continue // exclude the in-progress block
+    if (blocks[i].used > peak) peak = blocks[i].used
+  }
+  const limit = Math.max(peak, used, floorLimit)
+  const percentUsed = Math.min(100, Math.max(0, Math.round((used / limit) * 100)))
+  return {
+    windowMs,
+    used,
+    limit,
+    percentUsed,
+    percentLeft: 100 - percentUsed,
+    resetAt,
+    auto: true
+  }
+}
+
 /** Build the aggregated snapshot from raw records relative to `now`. Pure. */
 export function buildSnapshot(records: UsageRecord[], now: number): UsageSnapshot {
   const today = emptyTotals()
@@ -195,6 +261,8 @@ export function buildSnapshot(records: UsageRecord[], now: number): UsageSnapsho
 
   return {
     updatedAt: now,
+    fiveHour: computeWindow(records, now, 5 * 3_600_000, 1_000_000, 'hour'),
+    weekly: computeWindow(records, now, 7 * DAY_MS, 10_000_000, 'day'),
     today,
     last5h,
     last7d,

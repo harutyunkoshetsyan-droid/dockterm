@@ -3,16 +3,29 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v__VER__ — accurate usage, smoother munu
+## 🎯 What's new in v__VER__ — steadier terminals, Linux fixes & handy new tools
 
-**Usage that matches `/status`**
-- The Usage panel + pill now show **% used and reset times that line up with Claude Code's own `/status`** — calibrated against your plan (auto-detected) and cost-weighted, so cache reads no longer skew the numbers. It's still read entirely from your local sessions; run `/status` for the exact figures.
-- **Turn it off** anytime in **Settings → Usage** (with a plan picker), and it **auto-hides** if you don't use Claude Code on this machine.
+**Terminal fixes**
+- Fixed the **random garbled / "letters-on-letters"** rendering — the GPU renderer now recovers from context loss and terminals always start at the correct size.
+- **No more multi-second freeze** when opening or splitting a terminal after `cd`-ing into another folder (worst on Linux).
+- **Smoother, faster scrolling** that feels like a native terminal.
+- Every split pane now shows its **own live label** (Claude Code's terminal title).
 
-**munu polish**
-- **No more flicker** when you pin/unpin munu, and the quick-settings popup opens and closes snappily.
+**Linux**
+- **munu now works on Linux** — the floating mascot actually appears and is clickable (Wayland's lack of global cursor/positioning is worked around).
+- **Ctrl+Shift+C / Ctrl+Shift+V** now copy & paste in the terminal.
 
-Plus everything from v0.24.0: the Usage panel, native terminal scrolling, default tab/window shortcuts (⌘T/⌘N/⌘W ↔ Ctrl+Shift+T/N/W), drag-to-reorder panes, new themes (Aubergine, Gruvbox Dark, Paper), and pinnable munu with new characters.
+**Dock & Git**
+- The Files / Git dock now correctly **follows the focused pane's directory** — no more stale "This folder isn't a Git repository" after a `cd`.
+
+**New**
+- **Quick notes** — a top-bar scratchpad that **auto-saves** (no save button) and persists across sessions.
+- **Live file search** in the file tree — filters as you type.
+- The **project name** in the top bar, **clearer split/close pane controls**, and a full **application menu** (File / Edit / View / Window).
+- Clicking **munu** now just opens its popup (no surprise jump to the terminal).
+
+**Usage**
+- 5-hour **reset times anchor to your real session-limit resets**, with a self-calibrating budget — closer to `/status` than ever. Still read entirely from your local sessions.
 
 ---
 

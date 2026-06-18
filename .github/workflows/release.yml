@@ -115,3 +115,7 @@ jobs:
               done
           sed "s/__VER__/$VER/g" .github/RELEASE_NOTES.md > /tmp/notes.md
           gh release edit "$TAG" -R "$REPO" --notes-file /tmp/notes.md
+          # Publish automatically: this job only runs after every platform built
+          # (needs: release), so a green build = a published, latest release. This
+          # also means publishing never depends on a maintainer's local network.
+          gh release edit "$TAG" -R "$REPO" --draft=false --latest

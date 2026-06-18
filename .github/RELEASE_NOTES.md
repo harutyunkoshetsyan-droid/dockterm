@@ -3,7 +3,7 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v0.22.0 — agents, smarter panels, a real settings pass
+## 🎯 What's new in v0.22.1 — agents, smarter panels, a real settings pass
 
 - **Skills & Commands now actually show up.** They're scanned from your installed **plugins** and user config too (not just the project) — fixing the "No skills & commands found" you'd hit in a fresh folder.
 - **New Agents panel.** See your Claude Code subagents (`.claude/agents`) — project, user, and plugin — with descriptions.

@@ -6,6 +6,7 @@ import { registerIpc } from './ipc/register'
 import { killAllPtys } from './services/ptyService'
 import { stopAllWatchers } from './services/watcherService'
 import { setupMenubar, teardownMenubar } from './services/menubarService'
+import { setupAppMenu } from './services/appMenu'
 import { syncOverlay } from './services/munuService'
 import { startUpdateChecker } from './services/updateChecker'
 import { startUsageWatcher } from './services/usageService'
@@ -31,6 +32,7 @@ if (!gotLock) {
     serveAppProtocol()
     registerIpc()
     createMainWindow()
+    setupAppMenu()
     setupMenubar()
     syncOverlay()
     startUpdateChecker()

@@ -48,6 +48,15 @@ export interface AppInfo {
   home: string
 }
 
+/** Application-menu items that route to the focused renderer (File/View, etc.). */
+export type MenuAction =
+  | 'newTab'
+  | 'openProject'
+  | 'closeTab'
+  | 'splitRight'
+  | 'splitDown'
+  | 'settings'
+
 /* ----------------------------------- PTY ---------------------------------- */
 
 export interface CreatePtyReq {
@@ -290,6 +299,8 @@ export interface EventChannels {
   'update:error': { message: string }
   /** main → renderer: a fresh usage snapshot (transcripts grew). */
   'usage:changed': UsageSnapshot
+  /** main → focused renderer: an application-menu item was chosen. */
+  'menu:action': { action: MenuAction }
 }
 
 export type InvokeChannel = keyof InvokeChannels
@@ -381,7 +392,8 @@ export const EVENT_CHANNELS: readonly EventName[] = [
   'update:progress',
   'update:downloaded',
   'update:error',
-  'usage:changed'
+  'usage:changed',
+  'menu:action'
 ]
 
 export interface DockTermApi {

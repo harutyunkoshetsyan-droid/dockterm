@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useAppStore } from './state/useAppStore'
+import { useWorkspaceStore } from './state/useWorkspaceStore'
 import { useThemeStore } from './state/useThemeStore'
 import { useShortcuts } from './hooks/useShortcuts'
 import { useMunuBridge } from './components/munu/useMunuBridge'
@@ -33,6 +34,35 @@ export default function App() {
       if (r.ok) {
         document.documentElement.dataset.platform = r.value.platform
         useAppStore.setState({ homeDir: r.value.home })
+      }
+    })
+  }, [])
+
+  // Application-menu (File/View) items routed from the main process.
+  useEffect(() => {
+    return window.dockterm.on('menu:action', ({ action }) => {
+      const appState = useAppStore.getState()
+      const ws = useWorkspaceStore.getState()
+      const projectPath = appState.project?.path
+      switch (action) {
+        case 'openProject':
+          void appState.openProjectDialog()
+          break
+        case 'settings':
+          appState.setOpenPanel('settings')
+          break
+        case 'newTab':
+          if (projectPath) ws.open(projectPath)
+          break
+        case 'closeTab':
+          ws.closeFocused()
+          break
+        case 'splitRight':
+          ws.splitFocused('row')
+          break
+        case 'splitDown':
+          ws.splitFocused('col')
+          break
       }
     })
   }, [])

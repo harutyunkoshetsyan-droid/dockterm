@@ -280,3 +280,130 @@
   from { transform: translateY(-4px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+/* munu quick-settings popup */
+.mpop {
+  margin-top: 8px;
+  width: 230px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: #131319;
+  border: 1px solid #2a2a33;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-ui, sans-serif);
+  color: #e8e8ed;
+  cursor: default;
+}
+.mpop__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.mpop__label {
+  font-size: 12.5px;
+  color: #cfcfd6;
+  display: flex;
+  flex-direction: column;
+}
+.mpop__label--block {
+  margin-bottom: -2px;
+}
+.mpop__hint {
+  font-size: 10px;
+  color: #7c7c86;
+}
+.mpop__stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mpop__btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid #3a3a46;
+  background: #1b1b23;
+  color: #e8e8ed;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+.mpop__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.mpop__btn:not(:disabled):hover {
+  border-color: #7c6bff;
+}
+.mpop__val {
+  min-width: 28px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+.mpop__chars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.mpop__char {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0;
+  background: #1b1b23;
+  border: 1px solid #2a2a33;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.mpop__char:hover {
+  border-color: #3a3a46;
+}
+.mpop__char.is-active {
+  border-color: #7c6bff;
+  outline: 1px solid #7c6bff;
+}
+.mpop__toggle {
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: #3a3a46;
+  border: none;
+  position: relative;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.mpop__toggle.is-on {
+  background: #7c6bff;
+}
+.mpop__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.15s ease;
+}
+.mpop__toggle.is-on .mpop__knob {
+  left: 18px;
+}
+.mpop__open {
+  margin-top: 2px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #3a3a46;
+  background: #1b1b23;
+  color: #e8e8ed;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.mpop__open:hover {
+  border-color: #7c6bff;
+  background: #20202a;
+}

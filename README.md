@@ -203,7 +203,7 @@ Requires Node 22+. Architecture notes are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Status
 
-Early but actively developed, and used daily. It's an Electron app, so the download is fairly large. macOS builds are notarized; Windows is unsigned for now. Bugs and rough edges are expected — [issues](../../issues) and PRs are welcome.
+Early but actively developed, used daily, and **built and maintained with Claude Code itself.** It's an Electron app, so the download is fairly large. macOS builds are notarized; Windows is unsigned for now. Bugs and rough edges are expected — [issues](../../issues) and PRs are welcome.
 
 ## License
 

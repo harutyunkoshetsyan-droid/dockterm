@@ -112,7 +112,7 @@ By default munu tucks into the notch, slides out on hover, and peeks for a few s
 - **Real terminal** — xterm.js on a native PTY (your real shell). Tabs, splits, grids, true-color, unicode, search, and native, instant scrolling. Drag a pane to reorder the grid.
 - **Usage limits, live** — a Usage panel and a top-bar pill show how much of your rolling **5-hour** and **weekly** windows remain and **when each resets**, calibrated from your own history. Read locally; tokens-only; nothing leaves your machine.
 - **Diff review** — see exactly what changed since your last commit, this session, or a pinned checkpoint, and open a side-by-side diff for any file before you trust it.
-- **Beginner-safe Git** — grouped status, stage/discard, commit, push/pull, branches, with confirmations that show the exact command they'll run.
+- **Beginner-safe Git** — grouped status, stage/discard, commit, push/pull, branches, with confirmations on the risky actions that show the exact command they'll run.
 - **Files, editor & previews** — file tree, Monaco editor with a save-conflict guard, image and binary previews; drag a file or folder into a terminal to insert its path.
 - **MCP, skills & agents** — read-only views of your MCP servers (project, user, claude.ai connectors, and plugin-provided) with secrets masked, plus your skills, slash-commands and subagents; browse and scaffold skills.
 - **A project per pane** — a grid where each pane is a different repo; focus a pane and the side panels follow it, including a live `cd`.

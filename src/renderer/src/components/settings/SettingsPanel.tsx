@@ -5,6 +5,8 @@ import { useThemeStore } from '../../state/useThemeStore'
 import { THEMES } from '../../state/themes'
 import { DEFAULT_MONO, FONT_CHOICES } from '../terminal/terminalTheme'
 import type { CursorStyle, TerminalRenderer, Settings } from '@shared/types'
+import { CHARACTERS } from '../munu/mascots'
+import { Munu } from '../munu/Munu'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -262,6 +264,26 @@ export function SettingsPanel() {
         </Section>
 
         <Section title="munu">
+          <Field label="Character">
+            <span className="settings-note settings-note--inline">
+              pick who lives on your screen
+            </span>
+          </Field>
+          <div className="char-grid">
+            {CHARACTERS.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                className={`char-card${s.munu.character === c.id ? ' is-active' : ''}`}
+                onClick={() => setMunu({ character: c.id })}
+                title={c.blurb}
+                aria-pressed={s.munu.character === c.id}
+              >
+                <Munu state="idle" character={c.id} size={48} />
+                <span className="char-card__name">{c.label}</span>
+              </button>
+            ))}
+          </div>
           <Field label="Enable munu">
             <Toggle checked={s.munu.enabled} onChange={(v) => setMunu({ enabled: v })} />
           </Field>

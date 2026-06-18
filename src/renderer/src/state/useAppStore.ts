@@ -105,10 +105,13 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   initGitRepo: async () => {
-    const project = get().project
-    if (!project) return
-    const res = await window.dockterm.invoke('project:gitInit', { path: project.path })
-    if (res.ok) set({ project: res.value })
+    // Initialize in whatever directory the focused pane is in (its resolved
+    // root), falling back to the opened project.
+    const root = get().activeRoot ?? get().project?.path
+    if (!root) return
+    const res = await window.dockterm.invoke('project:gitInit', { path: root })
+    // Only refresh the opened-project info when we initialized THAT folder.
+    if (res.ok && res.value.path === get().project?.path) set({ project: res.value })
   },
 
   togglePanel: (panel) => set((s) => ({ openPanel: s.openPanel === panel ? null : panel })),

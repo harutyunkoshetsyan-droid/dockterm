@@ -29,6 +29,10 @@ export function Shell() {
   const hasTabs = useEditorStore((s) => s.tabs.length > 0)
   const diffTarget = useReviewStore((s) => s.diffTarget)
   const editorOpen = hasTabs || diffTarget != null
+  // Banner reflects the FOCUSED pane's directory (via the live git status that
+  // follows the active root), not the static first-opened project.
+  const gitStatus = useGitStore((s) => s.status)
+  const focusedNotRepo = gitStatus?.repoState === 'not-repo'
 
   const terminals = useWorkspaceStore((s) => s.tabs)
   const activeId = useWorkspaceStore((s) => s.activeId)
@@ -69,13 +73,16 @@ export function Shell() {
     gcTerminals(live)
   }, [terminals])
 
-  // Point the dock (files/git/…) at the focused pane's project, and refresh.
+  // Point the dock (files/git/…) at the focused pane's project, then refresh git
+  // — sequenced so the status is never read against the previous root (a race
+  // that left the panel showing the first-opened project after a `cd`).
   useEffect(() => {
     if (!focusedCwd) return
     void window.dockterm.invoke('project:setActiveRoot', { path: focusedCwd }).then((res) => {
-      if (res.ok) useAppStore.getState().setActiveRoot(res.value.root)
+      if (!res.ok) return
+      useAppStore.getState().setActiveRoot(res.value.root)
+      void useGitStore.getState().refresh()
     })
-    void useGitStore.getState().refresh()
   }, [focusedCwd])
 
   // Terminal shortcuts (capture phase so they win over the focused xterm).
@@ -139,10 +146,13 @@ export function Shell() {
   return (
     <div className="app">
       <TopBar />
-      {!project.isGitRepo && (
+      {focusedNotRepo && (
         <div className="banner">
           <span>This folder isn&apos;t a Git repository yet.</span>
-          <button className="btn btn--ghost btn--sm" onClick={() => void initGit()}>
+          <button
+            className="btn btn--ghost btn--sm"
+            onClick={() => void initGit().then(() => useGitStore.getState().refresh())}
+          >
             <GitBranchPlus size={13} /> Initialize Git
           </button>
         </div>

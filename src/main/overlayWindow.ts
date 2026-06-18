@@ -98,7 +98,11 @@ export function createOverlayWindow(): BrowserWindow {
 
   applyWindowSecurity(overlay)
   // Start click-through; the renderer enables interaction while hovering munu.
-  overlay.setIgnoreMouseEvents(true, { forward: true })
+  // Linux/Wayland can't forward mouse-move to a click-through window, so there
+  // the renderer could never detect a hover to flip it interactive — keep munu
+  // clickable from the start on Linux so it can be used at all.
+  if (isLinux) overlay.setIgnoreMouseEvents(false)
+  else overlay.setIgnoreMouseEvents(true, { forward: true })
 
   const devUrl = process.env['ELECTRON_RENDERER_URL']
   void overlay.loadURL(devUrl ? `${devUrl}/overlay.html` : OVERLAY_URL)
@@ -152,9 +156,14 @@ export function destroyOverlay(): void {
 }
 
 export function setOverlayInteractive(interactive: boolean): void {
-  if (overlay && !overlay.isDestroyed()) {
-    overlay.setIgnoreMouseEvents(!interactive, { forward: true })
+  if (!overlay || overlay.isDestroyed()) return
+  // On Linux the overlay stays interactive (mouse-forward isn't supported, so
+  // toggling click-through would make munu permanently unclickable).
+  if (isLinux) {
+    overlay.setIgnoreMouseEvents(false)
+    return
   }
+  overlay.setIgnoreMouseEvents(!interactive, { forward: true })
 }
 
 /** Temporarily make the overlay focusable so its text field can receive typing.

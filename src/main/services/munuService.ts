@@ -13,6 +13,8 @@ import {
 import { wantReveal } from './munuReveal'
 import type { MunuAsk, MunuGlobal, MunuState } from '@shared/types'
 
+const isLinux = process.platform === 'linux'
+
 /** Per-window aggregate, keyed by webContents id. */
 const windowStates = new Map<number, MunuGlobal>()
 let blockerId: number | null = null
@@ -44,12 +46,18 @@ function pollReveal(): void {
   const hasUnseenAsk = [...windowStates.values()].some((g) =>
     g.asks.some((a) => !a.visible)
   )
-  const want = wantReveal({
-    pinned: getSettings().munu.pinned,
-    cursorInZone: inRevealZone(),
-    hasUnseenAsk,
-    peekActive: Date.now() < peekUntil
-  })
+  // Wayland forbids global cursor queries — screen.getCursorScreenPoint() is
+  // unsupported there (returns [0,0]/stale), so the hover-reveal zone can never
+  // fire on Linux and munu would stay tucked-hidden forever. Keep it persistently
+  // revealed on Linux instead, so the mascot is actually visible.
+  const want = isLinux
+    ? true
+    : wantReveal({
+        pinned: getSettings().munu.pinned,
+        cursorInZone: inRevealZone(),
+        hasUnseenAsk,
+        peekActive: Date.now() < peekUntil
+      })
   if (want !== revealed) {
     revealed = want
     overlay.webContents.send('munu:reveal', want)

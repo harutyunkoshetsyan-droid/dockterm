@@ -173,6 +173,8 @@ export interface Settings {
   /** Selected theme id, or 'auto' to follow the OS appearance. */
   theme: string
   munu: MunuSettings
+  /** Free-form scratchpad (top-bar notes popover); auto-saved. */
+  notes: string
   workspace: WorkspacePersist | null
   /** Keyed by project path. */
   checkpoints: Record<string, Checkpoint>

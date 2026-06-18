@@ -167,6 +167,7 @@ export type SettingsPatch = Partial<
     | 'munu'
     | 'workspace'
     | 'theme'
+    | 'notes'
   >
 >
 

@@ -117,6 +117,8 @@ const settingsSchema = z.object({
   usage: preference.usage,
   munu: preference.munu,
   theme: z.string().default('dockterm-graphite'),
+  /** Free-form scratchpad shown in the top-bar notes popover; auto-saved. */
+  notes: z.string().max(200_000).default(''),
   workspace: workspaceSchema,
   checkpoints: z.record(checkpointSchema).default({})
 })
@@ -132,6 +134,7 @@ export const settingsPatchSchema = z.object({
   usage: preference.usage.optional(),
   munu: preference.munu.optional(),
   theme: z.string().optional(),
+  notes: z.string().max(200_000).optional(),
   workspace: workspaceSchema.optional()
 })
 

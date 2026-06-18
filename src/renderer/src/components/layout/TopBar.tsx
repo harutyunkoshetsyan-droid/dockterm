@@ -2,6 +2,7 @@ import { GitBranch, FolderOpen, AppWindow, SquareTerminal, ArrowUp, ArrowDown } 
 import { useAppStore } from '../../state/useAppStore'
 import { useGitStore } from '../../state/useGitStore'
 import { UsagePill } from '../usage/UsagePill'
+import { NotesButton } from './NotesButton'
 import { PANELS } from './panels'
 
 export function TopBar() {
@@ -91,6 +92,7 @@ export function TopBar() {
           )
         })}
         <span className="topbar__divider" />
+        <NotesButton />
         <button
           className={`iconbtn tip--end${miniTermOpen ? ' iconbtn--active' : ''}`}
           data-tip="Mini terminal"

@@ -20,6 +20,8 @@
   <a href="../../stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/munvard/dockterm?style=for-the-badge&label=Stars&labelColor=1e1e1d&color=fbbf24&logo=github&logoColor=white"></a>
   &nbsp;
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-7c6bff?style=for-the-badge&labelColor=1e1e1d&logo=opensourceinitiative&logoColor=white"></a>
+  &nbsp;
+  <a href="https://munetic.net/dockterm"><img alt="Website" src="https://img.shields.io/badge/Website-munetic.net-7c6bff?style=for-the-badge&labelColor=1e1e1d&logo=googlechrome&logoColor=white"></a>
 </p>
 
 <p align="center">

@@ -3,12 +3,11 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v0.23.0 — open a terminal anywhere, tidier panels
+## 🎯 What's new in v0.23.1 — updates install themselves
 
-- **"Open a terminal" — no project needed.** On the welcome screen and in the top bar, a new action opens a terminal straight in your home folder, so you can `cd` anywhere or start a new project on the spot.
-- **Custom config folders live in their panels now.** Set a custom Skills/Commands folder in the **Skills** panel, an Agents folder in **Agents**, and an extra `.mcp.json` in **MCP** — right next to what they configure (not buried in Settings).
-- **Simpler tab bar.** Removed the little dropdown arrow next to "+" — the "+" just opens a new terminal in the current project.
-- Plus everything from v0.22: the Agents panel, plugin/user skills + commands (fixes "none found"), the font picker, adjustable munu size, the update popup, and clearer settings copy.
+- **"Update now" downloads and installs in-app.** It fetches the right installer for your platform with a progress bar, then launches it — no more bouncing to a browser.
+- **Cleaner update popup.** It now shows just the "What's new" notes (no stray header text, no mid-sentence cut-off).
+- Plus everything from v0.23.0: open-a-terminal (home) from the welcome + top bar, per-panel config folders, and a simpler tab bar.
 
 ---
 

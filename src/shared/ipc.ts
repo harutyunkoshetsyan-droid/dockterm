@@ -35,6 +35,8 @@ export interface UpdateAvailable {
   latestVersion: string
   releaseUrl: string
   notes: string
+  /** true if an installer for this exact OS/arch was found (in-app download works). */
+  canAutoUpdate: boolean
 }
 
 export interface AppInfo {
@@ -220,8 +222,9 @@ export interface InvokeChannels {
   'info:get': (req: void) => Result<ProjectInfoData>
   'app:openExternal': (req: { url: string }) => Result<void>
 
-  // updates — manual check + snooze/skip for the "update available" popup.
+  // updates — manual check + snooze/skip + in-app download/install.
   'update:check': (req: void) => Result<{ upToDate: boolean }>
+  'update:download': (req: void) => Result<void>
   'update:snooze': (req: { hours: number }) => Result<void>
   'update:skip': (req: { version: string }) => Result<void>
 
@@ -260,6 +263,10 @@ export interface EventChannels {
   'munu:doFocus': { tabId: string; leafId: string }
   /** main → renderer: a newer release is available (poll-based). */
   'update:available': UpdateAvailable
+  /** main → renderer: in-app update download progress / result. */
+  'update:progress': { percent: number }
+  'update:downloaded': { path: string }
+  'update:error': { message: string }
 }
 
 export type InvokeChannel = keyof InvokeChannels
@@ -317,6 +324,7 @@ export const INVOKE_CHANNELS: readonly InvokeChannel[] = [
   'info:get',
   'app:openExternal',
   'update:check',
+  'update:download',
   'update:snooze',
   'update:skip',
   'window:new',
@@ -341,7 +349,10 @@ export const EVENT_CHANNELS: readonly EventName[] = [
   'munu:reveal',
   'munu:doAnswer',
   'munu:doFocus',
-  'update:available'
+  'update:available',
+  'update:progress',
+  'update:downloaded',
+  'update:error'
 ]
 
 export interface DockTermApi {

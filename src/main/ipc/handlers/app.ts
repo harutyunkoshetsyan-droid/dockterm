@@ -4,7 +4,12 @@ import { ok } from '@shared/result'
 import { APP_NAME } from '@shared/constants'
 import { createWindow, isPrimaryWindow, applyZoomToAllWindows } from '../../window'
 import { applySettingsPatch, getSettings } from '../../services/settingsService'
-import { checkForUpdate, snoozeUpdate, skipUpdate } from '../../services/updateChecker'
+import {
+  checkForUpdate,
+  downloadAndInstall,
+  snoozeUpdate,
+  skipUpdate
+} from '../../services/updateChecker'
 import type { Settings } from '@shared/types'
 import type { Registrar } from '../register'
 
@@ -32,6 +37,11 @@ export function registerAppHandlers(reg: Registrar): void {
   reg('update:check', z.void(), async () => {
     const found = await checkForUpdate(true)
     return ok({ upToDate: !found })
+  })
+
+  reg('update:download', z.void(), () => {
+    void downloadAndInstall()
+    return ok(undefined)
   })
 
   reg('update:snooze', z.object({ hours: z.number().min(0).max(720) }), (req) => {

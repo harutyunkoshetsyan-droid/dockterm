@@ -302,6 +302,20 @@ export function SettingsPanel() {
               <option value={88}>Extra large</option>
             </select>
           </Field>
+          <Field label="Pin to screen">
+            <Toggle checked={s.munu.pinned} onChange={(v) => setMunu({ pinned: v })} />
+          </Field>
+          {s.munu.pinned && (
+            <div className="settings-note">
+              munu stays visible and can be dragged anywhere.{' '}
+              <button
+                className="btn btn--ghost btn--sm"
+                onClick={() => setMunu({ position: null })}
+              >
+                Reset position
+              </button>
+            </div>
+          )}
           <Field label="Sounds">
             <Toggle checked={s.munu.sounds} onChange={(v) => setMunu({ sounds: v })} />
           </Field>

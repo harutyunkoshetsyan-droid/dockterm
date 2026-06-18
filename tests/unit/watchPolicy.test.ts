@@ -22,15 +22,27 @@ describe('countDirsBounded', () => {
   // Windows — normalize to '/' so the in-memory tree lookup is OS-independent.
   const read = (p: string): string[] => tree[p.split(/[\\/]/).join('/')] ?? []
 
-  it('counts dirs but prunes IGNORED_ENTRIES (node_modules)', () => {
+  it('counts dirs but prunes IGNORED_ENTRIES (node_modules)', async () => {
     // /p, /p/src, /p/src/inner, /p/a = 4 (node_modules pruned)
-    expect(countDirsBounded('/p', 100, read)).toBe(4)
+    expect(await countDirsBounded('/p', 100, read)).toBe(4)
   })
 
-  it('stops early once the cap is exceeded', () => {
+  it('stops early once the cap is exceeded', async () => {
     const big: Record<string, string[]> = { '/big': Array.from({ length: 50 }, (_, i) => `d${i}`) }
     for (let i = 0; i < 50; i++) big[`/big/d${i}`] = []
     const r = (p: string): string[] => big[p.split(/[\\/]/).join('/')] ?? []
-    expect(countDirsBounded('/big', 10, r)).toBeGreaterThan(10)
+    expect(await countDirsBounded('/big', 10, r)).toBeGreaterThan(10)
+  })
+
+  it('bails (reports too big) when the scan exceeds its time budget', async () => {
+    // Models a slow (iCloud/network) tree: each readdir "takes" 100ms of the fake
+    // clock and always yields more dirs, so the time budget — not the cap — stops it.
+    let t = 0
+    const now = (): number => t
+    const slowRead = (): string[] => {
+      t += 100
+      return Array.from({ length: 5 }, (_, i) => `d${i}`)
+    }
+    expect(await countDirsBounded('/root', 100_000, slowRead, 250, now)).toBeGreaterThan(100_000)
   })
 })

@@ -39,6 +39,9 @@ const watches = new Map<number, WindowWatch>()
 const RETARGET_DEBOUNCE_MS = 250
 const retargetTimers = new Map<number, ReturnType<typeof setTimeout>>()
 const pendingRoot = new Map<number, string>()
+// Bumped on each retarget so a slow async dir-scan started for an older root can
+// detect it's been superseded and not install a stale watcher.
+const retargetGen = new Map<number, number>()
 
 function schedule(id: number): void {
   const w = watches.get(id)
@@ -82,24 +85,36 @@ export function retargetWatcher(win: BrowserWindow, projectRoot: string): void {
       retargetTimers.delete(id)
       const root = pendingRoot.get(id)
       pendingRoot.delete(id)
-      if (root && !win.isDestroyed()) applyRetarget(win, root)
+      if (root && !win.isDestroyed()) void applyRetarget(win, root)
     }, RETARGET_DEBOUNCE_MS)
   )
 }
 
 /** Replace a window's watcher with one rooted at `projectRoot` (the debounced
- * worker behind retargetWatcher). */
-function applyRetarget(win: BrowserWindow, projectRoot: string): void {
+ * worker behind retargetWatcher). Async + non-blocking: the dir-scan never
+ * freezes the main process, and a scan superseded by a newer retarget is dropped. */
+async function applyRetarget(win: BrowserWindow, projectRoot: string): Promise<void> {
   const id = win.webContents.id
   const existing = watches.get(id)
   if (existing && existing.root === projectRoot) return
+  const gen = (retargetGen.get(id) ?? 0) + 1
+  retargetGen.set(id, gen)
   closeWatch(id)
 
   // Never recursively watch the home dir / a filesystem root, nor a tree larger
   // than the watch budget — either would walk a huge number of paths and stall
   // the app. (The file tree still works; there are just no live change events.)
   if (isTooLargeToWatch(projectRoot)) return
-  if (exceedsWatchBudget(countDirsBounded(projectRoot))) return
+  let count: number
+  try {
+    count = await countDirsBounded(projectRoot)
+  } catch {
+    return
+  }
+  // A newer retarget (or window teardown) happened while we were scanning — abort
+  // so we don't install a watcher for a stale root or leak one over a newer one.
+  if (win.isDestroyed() || retargetGen.get(id) !== gen) return
+  if (exceedsWatchBudget(count)) return
 
   const watcher = watch(projectRoot, {
     ignoreInitial: true,

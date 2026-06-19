@@ -123,6 +123,84 @@ describe('parseAsk', () => {
     expect(ask.cursorRow).toBe(1)
   })
 
+  it('ignores an echoed numbered prompt list above the real menu (only the last run counts)', () => {
+    // Reproduces the bug: the user's prompt ("1. … 2. … 3. … 4. …") is still on
+    // screen above Claude's actual Yes/No menu. Only the trailing menu is real.
+    const text = [
+      '> For testing interactive questions only. Do not edit any files.',
+      '',
+      'Ask me these prompts one by one:',
+      '',
+      '1. Permission question: ask a yes/no question: "Do you want to continue this test?"',
+      '2. Single-choice question: ask me to choose exactly 1 option from 5 options:',
+      '',
+      '    * Option A',
+      '    * Option B',
+      '3. Multi-choice question: ask me to choose multiple options from the same 5 options.',
+      '4. Two-stage question flow:',
+      '',
+      "● I'll run through these one by one. Starting with the first.",
+      '────────────────────────────',
+      '□ Continue?',
+      '',
+      'Do you want to continue this test?',
+      '',
+      '❯ 1. Yes',
+      '    Proceed with the remaining test questions.',
+      '  2. No',
+      '    Stop the test here.',
+      '  3. Type something.',
+      '────────────────────────────',
+      '  4. Chat about this',
+      '',
+      'Enter to select · ↑/↓ to navigate · Esc to cancel'
+    ].join('\n')
+    const ask = parseAsk(text)!
+    expect(ask.options).toEqual(['Yes', 'No', 'Type something.', 'Chat about this'])
+    expect(ask.binary).toBe(true)
+    expect(ask.cursorRow).toBe(0)
+    expect(ask.title).toContain('continue this test')
+  })
+
+  it('keeps the full 5-option menu even when an echoed 4-item list is on screen', () => {
+    const text = [
+      '1. First question.',
+      '2. Second question.',
+      '3. Third question.',
+      '4. Fourth question.',
+      '',
+      'Pick exactly one option:',
+      '',
+      '❯ 1. Option A',
+      '  2. Option B',
+      '  3. Option C',
+      '  4. Option D',
+      '  5. Option E',
+      'Enter to select · Esc to cancel'
+    ].join('\n')
+    const ask = parseAsk(text)!
+    expect(ask.options).toEqual(['Option A', 'Option B', 'Option C', 'Option D', 'Option E'])
+    expect(ask.binary).toBe(false)
+  })
+
+  it('drops an echoed list before a checkbox multi-select menu', () => {
+    const text = [
+      '1. Some earlier instruction.',
+      '2. Another earlier instruction.',
+      'Choose any of these (multi-select):',
+      '❯ 1. [ ] Red',
+      '  2. [x] Green',
+      '  3. [ ] Blue',
+      '  Submit',
+      'Enter to confirm · Esc to cancel'
+    ].join('\n')
+    const ask = parseAsk(text)!
+    expect(ask.multiSelect).toBe(true)
+    expect(ask.options).toEqual(['Red', 'Green', 'Blue', 'Submit'])
+    expect(ask.checked).toEqual([false, true, false, false])
+    expect(ask.submitIndex).toBe(3)
+  })
+
   it('returns null when not asking', () => {
     expect(parseAsk('just output')).toBeNull()
   })

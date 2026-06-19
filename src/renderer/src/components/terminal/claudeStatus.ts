@@ -70,6 +70,25 @@ function parseSteps(raw: string[]): { label: string; done: boolean }[] {
 }
 
 /**
+ * Of all candidate rows, return only the final menu — the last contiguous run
+ * of options. A run breaks whenever a numbered option's number fails to advance
+ * (resets to 1 or steps backwards), which is exactly where a separate, earlier
+ * list ends and the real menu begins. Un-numbered action rows (Submit) never
+ * break a run.
+ */
+function lastMenuRun<T extends { num: number | null }>(rows: T[]): T[] {
+  let start = 0
+  let prev: number | null = null
+  for (let i = 0; i < rows.length; i++) {
+    const n = rows[i].num
+    if (n === null) continue
+    if (prev !== null && n <= prev) start = i
+    prev = n
+  }
+  return rows.slice(start)
+}
+
+/**
  * Parse a Claude prompt into a clean title, step breadcrumb, and the menu rows
  * (with per-option descriptions), in textual order so arrow-key navigation
  * counts line up. Classifies as Yes/No (one-click), checkbox multi-select, or a
@@ -86,12 +105,17 @@ export function parseAsk(text: string): AskInfo | null {
   const multiSelect = /\[[ xX✓✔·•]\]/.test(text)
   const steps = parseSteps(raw)
 
-  // Collect navigable rows (with any description lines beneath them) in order.
-  // Numbered options always count; the un-numbered "Submit" row counts only for
-  // multi-select, where it's a real navigation stop.
-  const rows: { label: string; desc: string | null }[] = []
-  let firstMenuIdx = -1
-  let cursorRow = 0
+  // Collect every candidate navigable row (with its source line index, option
+  // number, cursor flag, and any description lines beneath it). Numbered options
+  // always count; the un-numbered "Submit" row counts only for multi-select,
+  // where it's a real navigation stop.
+  const allRows: {
+    label: string
+    desc: string | null
+    idx: number
+    num: number | null
+    cursor: boolean
+  }[] = []
   const hasCursorMark = (s: string): boolean => /^\s*[❯›>]/.test(s)
   for (let i = 0; i < raw.length; i++) {
     const stripped = raw[i].replace(BOX, ' ')
@@ -99,8 +123,6 @@ export function parseAsk(text: string): AskInfo | null {
     if (m) {
       const label = cleanLine(m[2])
       if (label) {
-        if (firstMenuIdx < 0) firstMenuIdx = i
-        if (hasCursorMark(stripped)) cursorRow = rows.length
         // Capture up to two indented description lines beneath the option.
         const desc: string[] = []
         for (let j = i + 1; j < raw.length && desc.length < 2; j++) {
@@ -110,19 +132,34 @@ export function parseAsk(text: string): AskInfo | null {
           if (!c || isFooterLine(c) || isStepLine(raw[j])) break
           desc.push(c)
         }
-        rows.push({ label, desc: desc.join(' ') || null })
+        allRows.push({
+          label,
+          desc: desc.join(' ') || null,
+          idx: i,
+          num: parseInt(m[1], 10),
+          cursor: hasCursorMark(stripped)
+        })
       }
       continue
     }
     if (multiSelect) {
       const a = cleanLine(stripped).match(ACTION_RE)
       if (a) {
-        if (firstMenuIdx < 0) firstMenuIdx = i
-        if (hasCursorMark(stripped)) cursorRow = rows.length
-        rows.push({ label: 'Submit', desc: null })
+        allRows.push({ label: 'Submit', desc: null, idx: i, num: null, cursor: hasCursorMark(stripped) })
       }
     }
   }
+
+  // Keep ONLY the real menu: the last contiguous run of options. Earlier
+  // numbered lines still on screen — an echoed prompt's "1. … 2. …" list, or a
+  // numbered sentence in Claude's own prose — form their own run(s); a run
+  // breaks wherever an option number resets or steps backwards (a menu always
+  // counts 1, 2, 3 …). Without this, those stray lines leak in as phantom
+  // options (e.g. an 8-row menu where Claude only offered 4).
+  const rows = lastMenuRun(allRows)
+  const firstMenuIdx = rows.length ? rows[0].idx : -1
+  const cursorAt = rows.findIndex((r) => r.cursor)
+  const cursorRow = cursorAt >= 0 ? cursorAt : 0
 
   // Split each row's checkbox marker (if any) from its display label.
   const options: string[] = []

@@ -33,3 +33,7 @@ jobs:
 
       - name: Build
         run: npm run build
+        # The renderer bundle (Monaco) is heavy; raise the V8 heap so the build
+        # never OOMs on a runner with a low default limit (matches release.yml).
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144

@@ -3,13 +3,9 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v__VER__ — clearer usage & panels that fit
+## 🎯 What's new in v__VER__ — split-grid popup fix
 
-**Usage panel**
-- Now shows only your **exact token usage** (last 5 hours / last 7 days) in a tidy, compact layout. Removed the reset-time guesses — those are only knowable from Anthropic's API, so the local estimate was wrong; the figures shown now are read straight from your local sessions and accurate.
-
-**Dock panels**
-- In **MCP / Skills / Agents**, the custom config/folder options now stay **pinned and visible** at the bottom instead of getting buried at the end of a long list, and nothing clips off the edge.
+- Fixed the **split-grid menu** not appearing when you click the grid icon — it was being clipped by the tab strip. It opens normally again.
 
 ---
 

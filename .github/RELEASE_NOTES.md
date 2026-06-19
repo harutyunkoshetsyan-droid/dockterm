@@ -3,7 +3,20 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v__VER__ — steadier terminals, Linux fixes & handy new tools
+## 🎯 What's new in v__VER__ — snappier scrolling & no more `cd` freeze
+
+**Performance**
+- Fixed a **multi-second freeze** when `cd`-ing into iCloud-synced folders (`~/Desktop`, `~/Documents`) or other very large directories — the folder scan is now async and time-bounded, so the terminal never stalls.
+
+**Terminal scrolling**
+- Scrolling is now **instant and snappy** — no easing/animation — so the wheel and trackpad feel exactly like the native macOS Terminal / gnome-terminal, with a faster step per notch.
+
+**Top bar**
+- On narrow windows the top bar now **adapts** — the controls wrap to a second row and labels shorten instead of getting clipped or crammed.
+
+---
+
+## 🎯 Previously in v0.25.0 — steadier terminals, Linux fixes & handy new tools
 
 **Terminal fixes**
 - Fixed the **random garbled / "letters-on-letters"** rendering — the GPU renderer now recovers from context loss and terminals always start at the correct size.

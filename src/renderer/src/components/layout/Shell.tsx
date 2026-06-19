@@ -41,9 +41,6 @@ export function Shell() {
   const [dockW, setDockW] = useState(260)
   const [editorW, setEditorW] = useState(520)
   const [miniH, setMiniH] = useState(200)
-  // Below this width the top bar can't fit its tools, so they relocate into the
-  // tab-strip row (and clip there if even that's too narrow).
-  const [compactBar, setCompactBar] = useState(false)
 
   const projectPath = project?.path
   const wsProject = useRef<string | null>(null)
@@ -66,13 +63,6 @@ export function Shell() {
     }
     wsProject.current = projectPath
   }, [projectPath])
-
-  useEffect(() => {
-    const check = (): void => setCompactBar(window.innerWidth < 880)
-    check()
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
-  }, [])
 
   // Garbage-collect pooled terminals whose pane no longer exists in any tab, so
   // closing a pane or tab tears down its shell — while a split/grid re-mount
@@ -155,7 +145,7 @@ export function Shell() {
 
   return (
     <div className="app">
-      <TopBar compact={compactBar} />
+      <TopBar />
       {focusedNotRepo && (
         <div className="banner">
           <span>This folder isn&apos;t a Git repository yet.</span>
@@ -182,7 +172,7 @@ export function Shell() {
             />
           )}
           <div className="term-wrap" key="term">
-            <TabStrip compact={compactBar} />
+            <TabStrip />
             <div className="term-stack">
               {terminals.map((tab) => (
                 <div

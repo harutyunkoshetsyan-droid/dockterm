@@ -3,9 +3,7 @@ import { useAppStore } from '../../state/useAppStore'
 import { useGitStore } from '../../state/useGitStore'
 import { TopBarTools } from './TopBarTools'
 
-/** `compact` = the window is too narrow to fit the tools here, so they're shown
- * in the tab-strip row instead (see Shell / TabStrip). */
-export function TopBar({ compact }: { compact: boolean }) {
+export function TopBar() {
   const project = useAppStore((s) => s.project)
   const openDialog = useAppStore((s) => s.openProjectDialog)
   const status = useGitStore((s) => s.status)
@@ -77,7 +75,7 @@ export function TopBar({ compact }: { compact: boolean }) {
           </span>
         )}
       </div>
-      <div className="topbar__right">{!compact && <TopBarTools />}</div>
+      <TopBarTools />
     </header>
   )
 }

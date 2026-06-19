@@ -11,34 +11,6 @@
 **Top bar**
 - On narrow windows the top-bar tools now tuck into the **tab row** (and quietly hide any that still don't fit) instead of crowding or clipping.
 
-Plus, from v0.25.1: **instant, native-feel scrolling** (no easing) and **no more multi-second freeze** when `cd`-ing into iCloud folders like `~/Desktop` / `~/Documents`.
-
----
-
-## 🎯 Previously in v0.25.0 — steadier terminals, Linux fixes & handy new tools
-
-**Terminal fixes**
-- Fixed the **random garbled / "letters-on-letters"** rendering — the GPU renderer now recovers from context loss and terminals always start at the correct size.
-- **No more multi-second freeze** when opening or splitting a terminal after `cd`-ing into another folder (worst on Linux).
-- **Smoother, faster scrolling** that feels like a native terminal.
-- Every split pane now shows its **own live label** (Claude Code's terminal title).
-
-**Linux**
-- **munu now works on Linux** — the floating mascot actually appears and is clickable (Wayland's lack of global cursor/positioning is worked around).
-- **Ctrl+Shift+C / Ctrl+Shift+V** now copy & paste in the terminal.
-
-**Dock & Git**
-- The Files / Git dock now correctly **follows the focused pane's directory** — no more stale "This folder isn't a Git repository" after a `cd`.
-
-**New**
-- **Quick notes** — a top-bar scratchpad that **auto-saves** (no save button) and persists across sessions.
-- **Live file search** in the file tree — filters as you type.
-- The **project name** in the top bar, **clearer split/close pane controls**, and a full **application menu** (File / Edit / View / Window).
-- Clicking **munu** now just opens its popup (no surprise jump to the terminal).
-
-**Usage**
-- 5-hour **reset times anchor to your real session-limit resets**, with a self-calibrating budget — closer to `/status` than ever. Still read entirely from your local sessions.
-
 ---
 
 ## ⬇️ Download

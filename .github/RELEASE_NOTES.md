@@ -3,11 +3,9 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v__VER__ — snappier, fully-visible munu
+## 🎯 What's new in v__VER__ — grab the window anywhere on the top bar
 
-- **No more stale confirm screens.** After you submit a multi-select, Claude shows a "Submit / Cancel" review — munu now switches to it **instantly** instead of showing the old checkboxes for a few seconds before catching up.
-- **Faster reactions.** munu reads Claude's state changes — asking → answered → next question, and "done" — noticeably quicker, so the card and the glow keep up with you.
-- **Always fully visible.** The ask-card is clamped to the screen's work area, so its bottom row (cancel / open terminal) is never clipped under the dock — even for long menus or when munu is pinned low.
+- **Drag the window from the whole top bar.** Previously only a tiny sliver at the edges actually moved the window — the wide empty space between the project info and the right-hand tools didn't grab. Now that entire empty area (and the project name / branch / changed-count) drags the window, while every button and the usage pill stays fully clickable.
 
 ---
 

@@ -3,16 +3,15 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v__VER__ — snappier scrolling & no more `cd` freeze
+## 🎯 What's new in v__VER__ — exact usage & a tidier top bar
 
-**Performance**
-- Fixed a **multi-second freeze** when `cd`-ing into iCloud-synced folders (`~/Desktop`, `~/Documents`) or other very large directories — the folder scan is now async and time-bounded, so the terminal never stalls.
-
-**Terminal scrolling**
-- Scrolling is now **instant and snappy** — no easing/animation — so the wheel and trackpad feel exactly like the native macOS Terminal / gnome-terminal, with a faster step per notch.
+**Usage you can trust**
+- The usage pill and panel now show your **exact token usage** — last 5 hours and last 7 days — read straight from your local Claude Code sessions. No more estimated percentages or plan guessing (the Plan setting is gone), and the panel lays out cleanly.
 
 **Top bar**
-- On narrow windows the top bar now **adapts** — the controls wrap to a second row and labels shorten instead of getting clipped or crammed.
+- On narrow windows the top-bar tools now tuck into the **tab row** (and quietly hide any that still don't fit) instead of crowding or clipping.
+
+Plus, from v0.25.1: **instant, native-feel scrolling** (no easing) and **no more multi-second freeze** when `cd`-ing into iCloud folders like `~/Desktop` / `~/Documents`.
 
 ---
 

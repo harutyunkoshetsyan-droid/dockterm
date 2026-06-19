@@ -1,41 +1,20 @@
 import { useEffect } from 'react'
-import { Activity, RefreshCw, Clock } from 'lucide-react'
+import { Activity, RefreshCw } from 'lucide-react'
 import { useUsageStore } from '../../state/useUsageStore'
 import { useAppStore } from '../../state/useAppStore'
 import type { UsageBucket } from '@shared/types'
-import { useNowTick } from './useNowTick'
-import { fmtTokens, fmtCountdown, fmtResetClock } from './format'
+import { fmtTokens } from './format'
 
-/** Headline card for one window: the exact tokens used in it + when it resets. */
-function WindowCard({
-  title,
-  used,
-  resetAt,
-  now
-}: {
-  title: string
-  used: number
-  resetAt: number | null
-  now: number
-}) {
+/** Compact card for one rolling window: the exact tokens used in it. (No reset
+ * time — the real reset is only known to Anthropic's API, so any local guess was
+ * wrong; we show only the figures we can read accurately.) */
+function WindowCard({ title, used }: { title: string; used: number }) {
   return (
     <div className="usage-win">
+      <div className="usage-win__title">{title}</div>
       <div className="usage-win__amount">
         <span className="usage-win__num">{fmtTokens(used)}</span>
         <span className="usage-win__unit">tokens</span>
-      </div>
-      <div className="usage-win__meta">
-        <div className="usage-win__title">{title}</div>
-        {resetAt ? (
-          <div className="usage-win__reset">
-            <Clock size={12} /> Resets in <b>{fmtCountdown(resetAt - now)}</b>
-            <span className="usage-win__at">· {fmtResetClock(resetAt)}</span>
-          </div>
-        ) : (
-          <div className="usage-win__reset usage-win__reset--idle">
-            Fresh — resets once you start
-          </div>
-        )}
       </div>
     </div>
   )
@@ -90,7 +69,6 @@ export function UsagePanel() {
   const snap = useUsageStore((s) => s.snapshot)
   const load = useUsageStore((s) => s.load)
   const enabled = useAppStore((s) => s.settings?.usage.enabled) ?? true
-  const now = useNowTick()
   useEffect(() => {
     if (enabled) void load()
   }, [load, enabled])
@@ -119,18 +97,10 @@ export function UsagePanel() {
           </div>
         ) : (
           <>
-            <WindowCard
-              title="Last 5 hours"
-              used={snap.last5h.totalTokens}
-              resetAt={snap.fiveHour.resetAt}
-              now={now}
-            />
-            <WindowCard
-              title="Last 7 days"
-              used={snap.last7d.totalTokens}
-              resetAt={snap.weekly.resetAt}
-              now={now}
-            />
+            <div className="usage-wins">
+              <WindowCard title="Last 5 hours" used={snap.last5h.totalTokens} />
+              <WindowCard title="Last 7 days" used={snap.last7d.totalTokens} />
+            </div>
 
             <div className="usage-note">
               Exact token usage read from your local Claude Code sessions on this machine.

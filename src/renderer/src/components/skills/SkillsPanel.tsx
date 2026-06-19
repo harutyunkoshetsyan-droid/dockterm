@@ -167,19 +167,19 @@ export function SkillsPanel() {
           </div>
         )}
 
-        <div className="panel-custom">
-          <div className="panel-custom__title">Custom folders</div>
-          <PathOverride
-            label="Skills folder"
-            value={settings?.claude.paths.skills ?? ''}
-            onChange={(v) => void setPath('skills', v)}
-          />
-          <PathOverride
-            label="Commands folder"
-            value={settings?.claude.paths.commands ?? ''}
-            onChange={(v) => void setPath('commands', v)}
-          />
-        </div>
+      </div>
+      <div className="panel-custom">
+        <div className="panel-custom__title">Custom folders</div>
+        <PathOverride
+          label="Skills folder"
+          value={settings?.claude.paths.skills ?? ''}
+          onChange={(v) => void setPath('skills', v)}
+        />
+        <PathOverride
+          label="Commands folder"
+          value={settings?.claude.paths.commands ?? ''}
+          onChange={(v) => void setPath('commands', v)}
+        />
       </div>
       <div className="git-commit skill-actions">
         <div className="skill-newmenu-wrap">

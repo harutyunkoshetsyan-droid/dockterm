@@ -921,7 +921,7 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 4px 0;
+  padding: 4px 0 8px;
 }
 
 /* ---------------------------------- Tree --------------------------------- */
@@ -2299,13 +2299,18 @@
 }
 
 /* Per-panel "custom folder" override (Skills / Agents / MCP panels). */
+/* Pinned footer: the custom config/folder overrides stay visible at the bottom
+   of the panel instead of being buried at the end of a long scrolling list. */
 .panel-custom {
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 9px;
+  padding: 9px 10px 11px;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+  max-height: 46%;
+  overflow-y: auto;
 }
 .panel-custom__title {
   font-size: 11px;
@@ -2535,73 +2540,43 @@
 }
 
 /* Headline rolling-limit card (5-hour / weekly). */
+/* Two compact rows: the exact tokens used in each rolling window. */
+.usage-wins {
+  display: flex;
+  flex-direction: column;
+}
 .usage-win {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 10px 4px 12px;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
   border-bottom: 1px solid var(--border);
-}
-.usage-win__amount {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  flex: 0 0 auto;
-  min-width: 78px;
-}
-.usage-win__num {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
-}
-.usage-win__unit {
-  font-size: 10px;
-  color: var(--text-faint);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.usage-win__meta {
-  flex: 1 1 auto;
-  min-width: 0;
 }
 .usage-win__title {
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
-  margin-bottom: 4px;
 }
-.usage-win__reset {
+.usage-win__amount {
   display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-wrap: wrap;
-  font-size: 12px;
-  color: var(--text-dim);
+  align-items: baseline;
+  gap: 4px;
+  flex: 0 0 auto;
 }
-.usage-win__reset b {
-  color: var(--text);
-  font-weight: 600;
+.usage-win__num {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  white-space: nowrap;
 }
-.usage-win__reset--idle {
+.usage-win__unit {
+  font-size: 10px;
   color: var(--text-faint);
-}
-.usage-win__at {
-  color: var(--text-faint);
-}
-.usage-win__track {
-  height: 6px;
-  border-radius: 999px;
-  background: var(--border);
-  overflow: hidden;
-  margin: 9px 0 6px;
-}
-.usage-win__fill {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  transition: width 0.4s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 .usage-win__note {
   font-size: 10.5px;

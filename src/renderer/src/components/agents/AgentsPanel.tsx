@@ -83,14 +83,14 @@ export function AgentsPanel() {
           </div>
         ))}
 
-        <div className="panel-custom">
-          <div className="panel-custom__title">Custom folder</div>
-          <PathOverride
-            label="Agents folder"
-            value={settings?.claude.paths.agents ?? ''}
-            onChange={(v) => void setAgentsPath(v)}
-          />
-        </div>
+      </div>
+      <div className="panel-custom">
+        <div className="panel-custom__title">Custom folder</div>
+        <PathOverride
+          label="Agents folder"
+          value={settings?.claude.paths.agents ?? ''}
+          onChange={(v) => void setAgentsPath(v)}
+        />
       </div>
     </div>
   )

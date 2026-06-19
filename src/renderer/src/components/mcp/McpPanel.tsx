@@ -123,16 +123,16 @@ export function McpPanel() {
           ))
         )}
 
-        <div className="panel-custom">
-          <div className="panel-custom__title">Custom config</div>
-          <PathOverride
-            label="Extra .mcp.json"
-            value={settings?.claude.paths.mcpConfig ?? ''}
-            placeholder="path to a .mcp.json"
-            pickDir={false}
-            onChange={(v) => void setMcpPath(v)}
-          />
-        </div>
+      </div>
+      <div className="panel-custom">
+        <div className="panel-custom__title">Custom config</div>
+        <PathOverride
+          label="Extra .mcp.json"
+          value={settings?.claude.paths.mcpConfig ?? ''}
+          placeholder="path to a .mcp.json"
+          pickDir={false}
+          onChange={(v) => void setMcpPath(v)}
+        />
       </div>
       <div className="git-commit">
         {hasProjectFile ? (

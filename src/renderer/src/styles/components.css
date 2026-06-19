@@ -114,7 +114,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  -webkit-app-region: no-drag;
+  /* NOTE: do NOT set `-webkit-app-region: no-drag` here. These containers are
+     flex:1 and fill the whole bar, so marking them no-drag subtracts the entire
+     bar from the window drag region — leaving only tiny padding slivers grabbable.
+     The bar is draggable via `.topbar { drag }`; the buttons opt back out via the
+     `.topbar button, …` no-drag rule below (in the title-bar section). */
 }
 /* Left group truncates the project name before anything overflows. */
 .topbar__left {

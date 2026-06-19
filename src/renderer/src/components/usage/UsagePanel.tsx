@@ -2,42 +2,40 @@ import { useEffect } from 'react'
 import { Activity, RefreshCw, Clock } from 'lucide-react'
 import { useUsageStore } from '../../state/useUsageStore'
 import { useAppStore } from '../../state/useAppStore'
-import type { UsageWindow, UsageBucket } from '@shared/types'
-import { Ring } from './Ring'
+import type { UsageBucket } from '@shared/types'
 import { useNowTick } from './useNowTick'
-import { fmtTokens, fmtCountdown, fmtResetClock, toneColor } from './format'
+import { fmtTokens, fmtCountdown, fmtResetClock } from './format'
 
-/** Headline card for one rolling limit window: a ring of remaining headroom +
- * when it resets. */
-function WindowCard({ title, w, now }: { title: string; w: UsageWindow; now: number }) {
-  const left = w.percentLeft
-  const tone = toneColor(left)
+/** Headline card for one window: the exact tokens used in it + when it resets. */
+function WindowCard({
+  title,
+  used,
+  resetAt,
+  now
+}: {
+  title: string
+  used: number
+  resetAt: number | null
+  now: number
+}) {
   return (
     <div className="usage-win">
-      <Ring pct={left} size={104} stroke={10} color={tone}>
-        <div className="usage-win__pct" style={{ color: tone }}>
-          {left}%
-        </div>
-        <div className="usage-win__cap">left</div>
-      </Ring>
+      <div className="usage-win__amount">
+        <span className="usage-win__num">{fmtTokens(used)}</span>
+        <span className="usage-win__unit">tokens</span>
+      </div>
       <div className="usage-win__meta">
         <div className="usage-win__title">{title}</div>
-        {w.resetAt ? (
+        {resetAt ? (
           <div className="usage-win__reset">
-            <Clock size={12} /> Resets in <b>{fmtCountdown(w.resetAt - now)}</b>
-            <span className="usage-win__at">· {fmtResetClock(w.resetAt)}</span>
+            <Clock size={12} /> Resets in <b>{fmtCountdown(resetAt - now)}</b>
+            <span className="usage-win__at">· {fmtResetClock(resetAt)}</span>
           </div>
         ) : (
           <div className="usage-win__reset usage-win__reset--idle">
             Fresh — resets once you start
           </div>
         )}
-        <div className="usage-win__track">
-          <span
-            className="usage-win__fill"
-            style={{ width: `${w.percentUsed}%`, background: tone }}
-          />
-        </div>
       </div>
     </div>
   )
@@ -121,12 +119,21 @@ export function UsagePanel() {
           </div>
         ) : (
           <>
-            <WindowCard title="5-hour limit" w={snap.fiveHour} now={now} />
-            <WindowCard title="Weekly limit" w={snap.weekly} now={now} />
+            <WindowCard
+              title="Last 5 hours"
+              used={snap.last5h.totalTokens}
+              resetAt={snap.fiveHour.resetAt}
+              now={now}
+            />
+            <WindowCard
+              title="Last 7 days"
+              used={snap.last7d.totalTokens}
+              resetAt={snap.weekly.resetAt}
+              now={now}
+            />
 
             <div className="usage-note">
-              Estimated from your local sessions — for exact figures, run <code>/status</code> in
-              Claude Code.
+              Exact token usage read from your local Claude Code sessions on this machine.
             </div>
 
             <div className="usage-section">

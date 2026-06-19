@@ -370,27 +370,10 @@ export function SettingsPanel() {
               onChange={(v) => void update({ usage: { ...s.usage, enabled: v } })}
             />
           </Field>
-          <Field label="Plan">
-            <select
-              className="settings-select"
-              value={s.usage.plan}
-              disabled={!s.usage.enabled}
-              onChange={(e) =>
-                void update({
-                  usage: { ...s.usage, plan: e.target.value as Settings['usage']['plan'] }
-                })
-              }
-            >
-              <option value="auto">Auto-detect</option>
-              <option value="pro">Pro</option>
-              <option value="max5x">Max 5×</option>
-              <option value="max20x">Max 20×</option>
-            </select>
-          </Field>
           <div className="settings-note">
-            Shows how much of your 5-hour and weekly limits is left, read from your local Claude
-            sessions on this machine. Percentages are an estimate — run <code>/status</code> in
-            Claude Code for exact figures. Turn this off if you don’t use Claude Code here.
+            Shows the exact number of tokens you’ve used in the last 5 hours and the last week,
+            read from your local Claude Code sessions on this machine — plus when each window
+            resets. Turn this off if you don’t use Claude Code here.
           </div>
         </Section>
 

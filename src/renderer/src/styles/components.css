@@ -2527,15 +2527,24 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px 4px 14px;
+  padding: 10px 4px 12px;
   border-bottom: 1px solid var(--border);
 }
-.usage-win__pct {
-  font-size: 23px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+.usage-win__amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 0 0 auto;
+  min-width: 78px;
 }
-.usage-win__cap {
+.usage-win__num {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.usage-win__unit {
   font-size: 10px;
   color: var(--text-faint);
   text-transform: uppercase;

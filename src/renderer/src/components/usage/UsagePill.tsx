@@ -1,13 +1,13 @@
 import { useEffect } from 'react'
+import { Activity } from 'lucide-react'
 import { useUsageStore } from '../../state/useUsageStore'
 import { useAppStore } from '../../state/useAppStore'
-import { Ring } from './Ring'
 import { useNowTick } from './useNowTick'
-import { fmtCountdown, toneColor } from './format'
+import { fmtTokens, fmtCountdown } from './format'
 
-/** Compact, always-visible readout of how much of your 5-hour usage window is
- * left + when it resets. Clicking opens the full Usage panel. Hidden until
- * there's any usage to base it on. */
+/** Compact, always-visible readout of the exact tokens used in the last 5 hours
+ * + when that window resets. Clicking opens the full Usage panel. Hidden until
+ * there's any local usage to show. */
 export function UsagePill() {
   const snap = useUsageStore((s) => s.snapshot)
   const load = useUsageStore((s) => s.load)
@@ -22,13 +22,13 @@ export function UsagePill() {
 
   if (!enabled || !snap || snap.empty) return null
 
-  const w = snap.fiveHour
-  const left = w.percentLeft
-  const reset = w.resetAt ? fmtCountdown(w.resetAt - now) : null
+  const used = snap.last5h.totalTokens
+  const resetAt = snap.fiveHour.resetAt
+  const reset = resetAt ? fmtCountdown(resetAt - now) : null
   const tip =
-    `5-hour usage: ${left}% left` +
-    (w.resetAt ? ` · resets in ${reset}` : ' · window is fresh') +
-    ` — Week: ${snap.weekly.percentLeft}% left`
+    `${fmtTokens(used)} tokens used in the last 5 hours` +
+    (resetAt ? ` · window resets in ${reset}` : '') +
+    ` — last 7 days: ${fmtTokens(snap.last7d.totalTokens)} tokens`
 
   return (
     <button
@@ -37,8 +37,8 @@ export function UsagePill() {
       aria-label={tip}
       onClick={() => toggle('usage')}
     >
-      <Ring pct={left} size={15} stroke={3} color={toneColor(left)} />
-      <span className="usage-pill__pct">{left}%</span>
+      <Activity size={13} className="usage-pill__icon" />
+      <span className="usage-pill__pct">{fmtTokens(used)}</span>
       {reset && <span className="usage-pill__sub">{reset}</span>}
     </button>
   )

@@ -3,6 +3,7 @@ import { Plus, X, LayoutGrid } from 'lucide-react'
 import { useWorkspaceStore } from '../../state/useWorkspaceStore'
 import { useAppStore } from '../../state/useAppStore'
 import { firstLeaf } from '../../state/layout'
+import { TopBarTools } from '../layout/TopBarTools'
 
 const GRID_PRESETS: { label: string; rows: number; cols: number }[] = [
   { label: '1', rows: 1, cols: 1 },
@@ -12,7 +13,7 @@ const GRID_PRESETS: { label: string; rows: number; cols: number }[] = [
   { label: '3 × 3', rows: 3, cols: 3 }
 ]
 
-export function TabStrip() {
+export function TabStrip({ compact = false }: { compact?: boolean }) {
   const tabs = useWorkspaceStore((s) => s.tabs)
   const activeId = useWorkspaceStore((s) => s.activeId)
   const activity = useWorkspaceStore((s) => s.activity)
@@ -118,6 +119,11 @@ export function TabStrip() {
           </div>
         )}
       </div>
+      {compact && (
+        <div className="tabstrip__tools">
+          <TopBarTools />
+        </div>
+      )}
     </div>
   )
 }

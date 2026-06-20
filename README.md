@@ -33,9 +33,9 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/hd/hero.gif" alt="munu surfacing Claude's prompt over a fullscreen movie, the film still visible alongside it" width="900">
+  <img src="docs/screenshots/main.png" alt="DockTerm: a multi-pane workspace with the file tree, two live Claude Code sessions, and a roadmap open side by side" width="960">
 </p>
-<p align="center"><sub>A movie's playing fullscreen and Claude needs a decision — munu floats the prompt <b>right over the film</b>, so you never miss the moment it needs you. (<a href="docs/screenshots/permission.png">still frame</a>)</sub></p>
+<p align="center"><sub>One calm window — your real <code>claude</code> sessions front and center, with files, diffs, Git, MCP and usage on demand. A project per pane.</sub></p>
 
 ---
 
@@ -68,7 +68,7 @@ Running Claude Code means living next to a terminal — alt-tabbing to read a di
 
 DockTerm reads Claude's state from the terminal output and shows it as **munu**, a small face near your menu bar — in the notch, on a MacBook. At a glance you can tell whether Claude is working, finished, or waiting for a `[y/n]`, even when DockTerm is behind another window. When Claude pauses to ask permission, munu surfaces the prompt so you can answer with one click — including multi-choice and free-text answers — and never lose your flow. It infers everything from the terminal; it **never auto-answers** and **never calls an API**.
 
-<p align="center"><img src="docs/screenshots/fullscreen.png" alt="munu surfacing a Claude permission prompt over a fullscreen video" width="900"></p>
+<p align="center"><img src="docs/screenshots/hd/hero.gif" alt="munu surfacing Claude's prompt over a fullscreen movie, answered without leaving the film" width="900"></p>
 <p align="center"><sub>Go watch something fullscreen — munu floats over it (even on another desktop/Space) and brings Claude's prompt to you, so you never miss it.</sub></p>
 
 By default munu tucks into the notch, slides out on hover, and peeks for a few seconds when Claude's state changes. Prefer it always in view? **Pin it and drag it anywhere on screen** — it stays put and visible wherever you put it. On Windows and Linux it's a small auto-hiding (or pinned) pill at the top of the screen.

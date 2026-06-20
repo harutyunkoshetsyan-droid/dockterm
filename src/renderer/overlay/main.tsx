@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Munu } from '@renderer/components/munu/Munu'
 import type { MascotCharacter, MunuAsk, MunuGlobal, MunuState, Settings } from '@shared/types'
+import { dragTarget, passedDragThreshold, pointInRect, primaryButtonHeld } from '@shared/munuDrag'
 import { playAsk, playDone } from './sounds'
 import { MunuPopup } from './MunuPopup'
 import './overlay.css'
@@ -55,6 +56,10 @@ function Overlay() {
   const munuRef = useRef<Settings['munu'] | null>(null)
   const dragRef = useRef<{ sx: number; sy: number; wx: number; wy: number } | null>(null)
   const movedRef = useRef(false)
+  // A pointer is pressed on munu (set on pointerdown, cleared on up/cancel). The
+  // window is kept interactive for as long as this is true so a fast drag can't
+  // toggle it click-through mid-motion and swallow the rest of the gesture.
+  const draggingRef = useRef(false)
   const prevPinned = useRef(false)
 
   useEffect(() => window.dockterm.on('munu:state', setG), [])
@@ -236,34 +241,62 @@ function Overlay() {
     void window.dockterm.invoke('munu:showApp', undefined)
   }
 
+  // End the gesture and tidy up: clear drag state, then — only after a real
+  // drag — re-derive click-through. We hold the window interactive for the whole
+  // drag, so if the cursor ended off munu we must resume auto-tuck here (a
+  // mouseleave won't fire again). If it ended over munu, stay interactive.
+  const endDrag = (e?: React.PointerEvent): void => {
+    const wasDragging = draggingRef.current
+    draggingRef.current = false
+    dragRef.current = null
+    if (!wasDragging || !e || showCard) return
+    const el = islandRef.current
+    if (el && !pointInRect(e.clientX, e.clientY, el.getBoundingClientRect())) {
+      setInteractive(false)
+      setPopupOpen(false)
+    }
+  }
+
   const onPointerDown = (e: React.PointerEvent): void => {
     if (showCard) return
     movedRef.current = false
     if (!pinned) return // only pinned munu drags
+    // Mark the gesture active synchronously so mouseleave can't flip the window
+    // click-through before the bounds round-trip lands, and so a fast
+    // click-release can cancel the (async) drag arming below.
+    draggingRef.current = true
+    const sx = e.screenX
+    const sy = e.screenY
+    // Capture on the stable container (not e.target, an SVG path inside <Munu>
+    // that React replaces on every state change — which would drop capture).
+    e.currentTarget.setPointerCapture?.(e.pointerId)
     void window.dockterm.invoke('munu:getBounds', undefined).then((r) => {
-      if (r.ok) dragRef.current = { sx: e.screenX, sy: e.screenY, wx: r.value.x, wy: r.value.y }
+      if (draggingRef.current && r.ok) dragRef.current = { sx, sy, wx: r.value.x, wy: r.value.y }
     })
-    ;(e.target as Element).setPointerCapture?.(e.pointerId)
   }
 
   const onPointerMove = (e: React.PointerEvent): void => {
     const d = dragRef.current
     if (!d) return
-    const dx = e.screenX - d.sx
-    const dy = e.screenY - d.sy
-    if (!movedRef.current && Math.hypot(dx, dy) < 4) return
+    // Button released without a pointerup reaching us (the window can briefly go
+    // click-through and swallow it). End the drag instead of letting munu keep
+    // chasing the cursor with nothing held — the bug where it "follows again".
+    if (!primaryButtonHeld(e.buttons)) {
+      endDrag(e)
+      return
+    }
+    if (!movedRef.current && !passedDragThreshold(d, e.screenX, e.screenY)) return
     movedRef.current = true
-    void window.dockterm.invoke('munu:move', { x: d.wx + dx, y: d.wy + dy })
+    void window.dockterm.invoke('munu:move', dragTarget(d, e.screenX, e.screenY))
   }
 
   const onPointerUp = (e: React.PointerEvent): void => {
     const d = dragRef.current
-    dragRef.current = null
+    const moved = movedRef.current
+    endDrag(e)
     if (showCard) return
-    if (d && movedRef.current) {
-      const dx = e.screenX - d.sx
-      const dy = e.screenY - d.sy
-      writeMunu({ position: { x: d.wx + dx, y: d.wy + dy } })
+    if (d && moved) {
+      writeMunu({ position: dragTarget(d, e.screenX, e.screenY) })
       return // a drag, not a click
     }
     // A real click just toggles munu's popup — it must NOT surface/open the
@@ -287,7 +320,11 @@ function Overlay() {
         onMouseLeave={() => {
           // Leaving the whole munu+popup area dismisses the popup, so an unpinned
           // munu resumes its normal auto-tuck. Moving between munu and the popup
-          // stays inside .island, so this doesn't fire mid-interaction.
+          // stays inside .island, so this doesn't fire mid-interaction. During a
+          // drag the cursor can briefly outrun the (async-moved) window and leave
+          // .island — keep interactive so we don't go click-through and swallow
+          // the rest of the gesture; endDrag re-derives click-through on release.
+          if (draggingRef.current) return
           setInteractive(false)
           setPopupOpen(false)
         }}
@@ -297,6 +334,8 @@ function Overlay() {
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
+          onPointerCancel={endDrag}
+          onLostPointerCapture={endDrag}
           title={pinned ? 'munu — drag to move · click for settings' : 'munu'}
         >
           {pinned && showHint && (

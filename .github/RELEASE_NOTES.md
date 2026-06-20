@@ -3,9 +3,9 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v__VER__ — grab the window anywhere on the top bar
+## 🎯 What's new in v__VER__ — munu drags smoothly again
 
-- **Drag the window from the whole top bar.** Previously only a tiny sliver at the edges actually moved the window — the wide empty space between the project info and the right-hand tools didn't grab. Now that entire empty area (and the project name / branch / changed-count) drags the window, while every button and the usage pill stays fully clickable.
+- **Fixed dragging the pinned munu mascot.** Moving munu around the screen could stall mid-drag — it would stop following the cursor, then later start chasing the cursor again on its own without you holding the button, leaving it stuck and twitchy. The overlay was flipping itself click-through the moment a fast drag let the cursor outrun the window, which swallowed the rest of the gesture. munu now stays grabbed for the whole drag, releases cleanly, and can never follow the cursor unless the button is actually held.
 
 ---
 

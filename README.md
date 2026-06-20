@@ -33,9 +33,9 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/permission.png" alt="munu catching a Claude permission prompt in the notch" width="900">
+  <img src="docs/screenshots/demo.gif" alt="munu catching Claude's permission prompt over a fullscreen video, answered in one click" width="900">
 </p>
-<p align="center"><sub>Claude paused to ask permission — munu caught it in the notch, so you can answer without leaving what you were doing.</sub></p>
+<p align="center"><sub>Claude paused for a <code>[y/n]</code> while a video played fullscreen — munu surfaced it <b>over the video</b> and it's answered in one click, no window-switching. (<a href="docs/screenshots/permission.png">still frame</a>)</sub></p>
 
 ---
 

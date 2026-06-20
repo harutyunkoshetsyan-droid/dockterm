@@ -33,7 +33,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/main.png" alt="DockTerm: a multi-pane workspace with the file tree, two live Claude Code sessions, and a roadmap open side by side" width="960">
+  <img src="docs/screenshots/cover.png" alt="DockTerm: a multi-pane workspace with the file tree, two live Claude Code sessions, and a roadmap open side by side" width="960">
 </p>
 <p align="center"><sub>One calm window — your real <code>claude</code> sessions front and center, with files, diffs, Git, MCP and usage on demand. A project per pane.</sub></p>
 

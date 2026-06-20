@@ -122,17 +122,29 @@ By default munu tucks into the notch, slides out on hover, and peeks for a few s
 - **Themes & zoom** — ten themes (incl. Tokyo Night, Catppuccin, Nord, Rosé Pine, an Ubuntu-style Aubergine, and Gruvbox) plus follow-system, and `⌘`/`Ctrl` `+ / − / 0` to scale the whole UI.
 - **In-app updates** — DockTerm checks for new releases and can download and install the latest for your platform in one click.
 
+#### Split into a grid — a project per pane
+<p align="center"><img src="docs/screenshots/grid.gif" alt="Splitting one terminal into a 2x2 grid of panes, then rearranging them by dragging" width="880"></p>
+
 #### Open any project — Claude in a real terminal
 <p align="center"><img src="docs/screenshots/open.gif" alt="Opening a project: welcome screen, recent projects, folder picker, then a terminal with Claude running" width="880"></p>
+
+#### Your files, editor and image previews
+<p align="center"><img src="docs/screenshots/files.gif" alt="Browsing the project file tree and opening files in the built-in editor" width="880"></p>
 
 #### Review what Claude changed, then commit when you're ready
 <p align="center"><img src="docs/screenshots/diff.gif" alt="Reviewing Claude's changes in a side-by-side red/green diff" width="880"></p>
 
+#### MCP, skills & agents — read-only, secrets masked
+<p align="center"><img src="docs/screenshots/panels.gif" alt="Read-only panels for MCP servers, skills, and subagents, with secrets masked to key names" width="880"></p>
+
 #### See how much of your limits are left
 <p align="center"><img src="docs/screenshots/usage.gif" alt="The usage panel: a bar chart of token usage and how much of the rolling 5-hour and weekly limits remain" width="880"></p>
 
-#### One window, many projects
-<p align="center"><img src="docs/screenshots/grid.png" alt="A grid of terminals, each a different project" width="880"></p>
+#### Ten themes, light and dark
+<p align="center"><img src="docs/screenshots/themes.gif" alt="Switching the whole UI through several light and dark themes from settings" width="880"></p>
+
+#### munu, pinned anywhere — reacting as Claude works
+<p align="center"><img src="docs/screenshots/states.gif" alt="munu pinned on screen, changing its face as Claude works and finishes" width="880"></p>
 
 ## Keyboard shortcuts
 

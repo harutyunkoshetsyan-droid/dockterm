@@ -33,9 +33,9 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/demo.gif" alt="munu catching Claude's permission prompt over a fullscreen video, answered in one click" width="900">
+  <img src="docs/screenshots/hd/hero.gif" alt="munu surfacing Claude's prompt over a fullscreen movie, the film still visible alongside it" width="900">
 </p>
-<p align="center"><sub>Claude paused to ask while a movie played fullscreen — munu surfaced the prompt <b>over the video</b>, answered right there, no window-switching. (<a href="docs/screenshots/permission.png">still frame</a>)</sub></p>
+<p align="center"><sub>A movie's playing fullscreen and Claude needs a decision — munu floats the prompt <b>right over the film</b>, so you never miss the moment it needs you. (<a href="docs/screenshots/permission.png">still frame</a>)</sub></p>
 
 ---
 
@@ -123,28 +123,28 @@ By default munu tucks into the notch, slides out on hover, and peeks for a few s
 - **In-app updates** — DockTerm checks for new releases and can download and install the latest for your platform in one click.
 
 #### Split into a grid — a project per pane
-<p align="center"><img src="docs/screenshots/grid.gif" alt="Splitting one terminal into a 2x2 grid of panes, then rearranging them by dragging" width="880"></p>
+<p align="center"><img src="docs/screenshots/hd/grid.gif" alt="Splitting one terminal into a 2x2 grid of panes, then rearranging them by dragging" width="880"></p>
 
 #### Open any project — Claude in a real terminal
-<p align="center"><img src="docs/screenshots/open.gif" alt="Opening a project: welcome screen, recent projects, folder picker, then a terminal with Claude running" width="880"></p>
+<p align="center"><img src="docs/screenshots/hd/open.gif" alt="Opening a project: welcome screen, recent projects, folder picker, then a terminal with Claude running" width="880"></p>
 
 #### Your files, editor and image previews
-<p align="center"><img src="docs/screenshots/files.gif" alt="Browsing the project file tree and opening files in the built-in editor" width="880"></p>
+<p align="center"><img src="docs/screenshots/hd/files.gif" alt="Browsing the project file tree and opening files in the built-in editor" width="880"></p>
 
 #### Review what Claude changed, then commit when you're ready
-<p align="center"><img src="docs/screenshots/diff.gif" alt="Reviewing Claude's changes in a side-by-side red/green diff" width="880"></p>
+<p align="center"><img src="docs/screenshots/hd/diff.gif" alt="Reviewing Claude's changes in a side-by-side red/green diff" width="880"></p>
 
 #### MCP, skills & agents — read-only, secrets masked
-<p align="center"><img src="docs/screenshots/panels.gif" alt="Read-only panels for MCP servers, skills, and subagents, with secrets masked to key names" width="880"></p>
+<p align="center"><img src="docs/screenshots/hd/panels.gif" alt="Read-only panels for MCP servers, skills, and subagents, with secrets masked to key names" width="880"></p>
 
 #### See how much of your limits are left
-<p align="center"><img src="docs/screenshots/usage.gif" alt="The usage panel: a bar chart of token usage and how much of the rolling 5-hour and weekly limits remain" width="880"></p>
+<p align="center"><img src="docs/screenshots/hd/usage.gif" alt="The usage panel: a bar chart of token usage and how much of the rolling 5-hour and weekly limits remain" width="880"></p>
 
 #### Ten themes, light and dark
-<p align="center"><img src="docs/screenshots/themes.gif" alt="Switching the whole UI through several light and dark themes from settings" width="880"></p>
+<p align="center"><img src="docs/screenshots/hd/themes.gif" alt="Switching the whole UI through several light and dark themes from settings" width="880"></p>
 
 #### munu, pinned anywhere — reacting as Claude works
-<p align="center"><img src="docs/screenshots/states.gif" alt="munu pinned on screen, changing its face as Claude works and finishes" width="880"></p>
+<p align="center"><img src="docs/screenshots/hd/states.gif" alt="munu pinned on screen, changing its face as Claude works and finishes" width="880"></p>
 
 ## Keyboard shortcuts
 

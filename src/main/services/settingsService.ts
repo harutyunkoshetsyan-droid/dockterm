@@ -49,7 +49,7 @@ const preference = {
       editorRatio: z.number().min(0.2).max(0.8).default(0.5),
       miniTermHeight: z.number().min(80).max(600).default(160),
       openPanel: z
-        .enum(['files', 'git', 'review', 'mcp', 'skills', 'agents', 'usage', 'info', 'settings'])
+        .enum(['files', 'git', 'review', 'mcp', 'skills', 'agents', 'activity', 'usage', 'info', 'settings'])
         .nullable()
         .default(null),
       miniTermOpen: z.boolean().default(false),
@@ -86,6 +86,16 @@ const preference = {
       plan: z.enum(['auto', 'pro', 'max5x', 'max20x']).default('auto')
     })
     .default({}),
+  agentActivity: z
+    .object({
+      enabled: z.boolean().default(true),
+      streamOutput: z.boolean().default(true),
+      swarm: z.boolean().default(true),
+      pill: z.boolean().default(true),
+      sounds: z.boolean().default(true),
+      notifications: z.boolean().default(true)
+    })
+    .default({}),
   munu: z
     .object({
       enabled: z.boolean().default(true),
@@ -115,6 +125,7 @@ const settingsSchema = z.object({
   claude: preference.claude,
   update: preference.update,
   usage: preference.usage,
+  agentActivity: preference.agentActivity,
   munu: preference.munu,
   theme: z.string().default('dockterm-graphite'),
   /** Free-form scratchpad shown in the top-bar notes popover; auto-saved. */
@@ -132,6 +143,7 @@ export const settingsPatchSchema = z.object({
   claude: preference.claude.optional(),
   update: preference.update.optional(),
   usage: preference.usage.optional(),
+  agentActivity: preference.agentActivity.optional(),
   munu: preference.munu.optional(),
   theme: z.string().optional(),
   notes: z.string().max(200_000).optional(),

@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react'
 import { SquareTerminal } from 'lucide-react'
 import { useAppStore } from '../../state/useAppStore'
 import { UsagePill } from '../usage/UsagePill'
+import { AgentPill } from '../agents/AgentPill'
 import { NotesButton } from './NotesButton'
 import { PANELS } from './panels'
 
@@ -71,6 +72,7 @@ export function TopBarTools() {
 
   return (
     <div className="topbar__right" ref={ref}>
+      <AgentPill />
       <UsagePill />
       {panels.map((panel) => {
         const Icon = panel.icon

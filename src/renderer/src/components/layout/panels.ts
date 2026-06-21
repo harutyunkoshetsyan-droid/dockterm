@@ -6,6 +6,7 @@ import {
   Plug,
   Sparkles,
   Bot,
+  Workflow,
   Activity,
   Info,
   Settings
@@ -26,6 +27,7 @@ export const PANELS: PanelDef[] = [
   { id: 'mcp', label: 'MCP Servers', icon: Plug },
   { id: 'skills', label: 'Skills', icon: Sparkles },
   { id: 'agents', label: 'Agents', icon: Bot },
+  { id: 'activity', label: 'Activity', icon: Workflow },
   { id: 'usage', label: 'Usage', icon: Activity },
   { id: 'info', label: 'Project Info', icon: Info },
   { id: 'settings', label: 'Settings', icon: Settings }

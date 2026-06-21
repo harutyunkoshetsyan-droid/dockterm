@@ -5,6 +5,7 @@ import { ReviewPanel } from '../review/ReviewPanel'
 import { McpPanel } from '../mcp/McpPanel'
 import { SkillsPanel } from '../skills/SkillsPanel'
 import { AgentsPanel } from '../agents/AgentsPanel'
+import { ActivityPanel } from '../agents/ActivityPanel'
 import { UsagePanel } from '../usage/UsagePanel'
 import { ProjectInfoPanel } from '../info/ProjectInfoPanel'
 import { SettingsPanel } from '../settings/SettingsPanel'
@@ -21,6 +22,7 @@ export function Dock() {
       {openPanel === 'mcp' && <McpPanel />}
       {openPanel === 'skills' && <SkillsPanel />}
       {openPanel === 'agents' && <AgentsPanel />}
+      {openPanel === 'activity' && <ActivityPanel />}
       {openPanel === 'usage' && <UsagePanel />}
       {openPanel === 'info' && <ProjectInfoPanel />}
       {openPanel === 'settings' && <SettingsPanel />}

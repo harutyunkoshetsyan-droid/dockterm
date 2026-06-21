@@ -10,6 +10,7 @@ import { setupAppMenu } from './services/appMenu'
 import { syncOverlay } from './services/munuService'
 import { startUpdateChecker } from './services/updateChecker'
 import { startUsageWatcher } from './services/usageService'
+import { startAgentWatcher } from './services/agentActivityService'
 import { destroyOverlay } from './overlayWindow'
 
 // Must run before `app` is ready.
@@ -37,6 +38,7 @@ if (!gotLock) {
     syncOverlay()
     startUpdateChecker()
     startUsageWatcher()
+    startAgentWatcher()
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {

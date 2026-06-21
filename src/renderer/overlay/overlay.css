@@ -471,3 +471,73 @@
 @media (prefers-reduced-motion: reduce) {
   .movehint { animation: none; }
 }
+
+/* The agent swarm: little creatures gathering under munu while sub-agents run. */
+.swarm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  max-width: 184px;
+  margin-top: -2px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(18, 18, 26, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(9px);
+  animation: swarm-in 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.swarm__bug {
+  display: grid;
+  place-items: center;
+  will-change: transform;
+  animation:
+    bug-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both,
+    bug-bob 2.8s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 70ms), calc(var(--i) * 70ms + 420ms);
+}
+.swarm__bug .munu {
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+}
+.swarm__more {
+  padding: 0 3px;
+  font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: rgba(255, 255, 255, 0.72);
+}
+@keyframes swarm-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes bug-in {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes bug-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .swarm,
+  .swarm__bug {
+    animation: none !important;
+  }
+}

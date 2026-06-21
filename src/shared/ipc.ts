@@ -29,7 +29,8 @@ import type {
   SkillTemplate,
   ProjectInfoData,
   MunuGlobal,
-  UsageSnapshot
+  UsageSnapshot,
+  AgentActivity
 } from './types'
 
 export interface UpdateAvailable {
@@ -173,6 +174,7 @@ export type SettingsPatch = Partial<
     | 'claude'
     | 'update'
     | 'usage'
+    | 'agentActivity'
     | 'munu'
     | 'workspace'
     | 'theme'
@@ -246,6 +248,9 @@ export interface InvokeChannels {
   /** Aggregated, tokens-only Claude usage from local ~/.claude transcripts. */
   'usage:get': (req: void) => Result<UsageSnapshot>
 
+  /** Live Claude Code sub-agent activity from local ~/.claude transcripts. */
+  'activity:get': (req: void) => Result<AgentActivity>
+
   // updates — manual check + snooze/skip + in-app download/install.
   'update:check': (req: void) => Result<{ upToDate: boolean }>
   'update:download': (req: void) => Result<void>
@@ -300,6 +305,8 @@ export interface EventChannels {
   'update:error': { message: string }
   /** main → renderer: a fresh usage snapshot (transcripts grew). */
   'usage:changed': UsageSnapshot
+  /** main → every window: a fresh live sub-agent activity snapshot. */
+  'activity:changed': AgentActivity
   /** main → focused renderer: an application-menu item was chosen. */
   'menu:action': { action: MenuAction }
 }
@@ -360,6 +367,7 @@ export const INVOKE_CHANNELS: readonly InvokeChannel[] = [
   'info:get',
   'app:openExternal',
   'usage:get',
+  'activity:get',
   'update:check',
   'update:download',
   'update:snooze',
@@ -394,6 +402,7 @@ export const EVENT_CHANNELS: readonly EventName[] = [
   'update:downloaded',
   'update:error',
   'usage:changed',
+  'activity:changed',
   'menu:action'
 ]
 

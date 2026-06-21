@@ -7,6 +7,7 @@ export type PanelId =
   | 'mcp'
   | 'skills'
   | 'agents'
+  | 'activity'
   | 'usage'
   | 'info'
   | 'settings'
@@ -139,6 +140,67 @@ export interface UsageSettings {
   plan: 'auto' | 'pro' | 'max5x' | 'max20x'
 }
 
+/* --------------------------- live agent activity --------------------------- */
+
+/** Lifecycle of a Claude Code sub-agent, inferred from the local transcript. */
+export type AgentPhase = 'running' | 'done' | 'failed'
+
+/** One Claude Code sub-agent (spawned via the `Agent`/`Task` tool), reconstructed
+ * read-only from the local `~/.claude` session transcripts. The transcript records the spawn
+ * (type + description + start) and the completion (result text + ok/fail), but not
+ * the agent's internal step-by-step output — so this is a live status + final
+ * result, not a streaming log. */
+export interface LiveAgent {
+  /** The spawning tool_use id (toolu_…) — stable and unique. */
+  id: string
+  /** uuid of the assistant message that spawned it (groups siblings into a tree). */
+  parentMsgId: string | null
+  /** subagent_type, e.g. 'Explore', 'general-purpose'. */
+  type: string
+  /** the spawn's `description` (short human label). */
+  description: string
+  /** project root (cwd) the agent runs in. */
+  project: string
+  /** last path segment of `project`, for grouping. */
+  projectLabel: string
+  /** transcript session id (file stem). */
+  sessionId: string
+  startedAt: number
+  endedAt: number | null
+  phase: AgentPhase
+  durationMs: number | null
+  /** true=succeeded, false=errored, null=still running. */
+  ok: boolean | null
+  /** capped final result text once done (null while running, or if streamOutput off). */
+  resultPreview: string | null
+}
+
+/** Aggregated live-agent snapshot broadcast to every window. */
+export interface AgentActivity {
+  updatedAt: number
+  /** active + recently-finished agents (finished drop after a retain window). */
+  agents: LiveAgent[]
+  /** how many are currently running. */
+  activeCount: number
+  /** running counts grouped by project, most-active first. */
+  byProject: { project: string; label: string; count: number }[]
+}
+
+export interface AgentActivitySettings {
+  /** Master switch for the Activity panel, pill, and swarm. */
+  enabled: boolean
+  /** Read the agent's final result text (content), or metadata-only. */
+  streamOutput: boolean
+  /** Show the creature swarm under the floating munu overlay. */
+  swarm: boolean
+  /** Show the live count pill in the top bar. */
+  pill: boolean
+  /** Soft chime when agents finish (while the app is unfocused). */
+  sounds: boolean
+  /** Desktop notification when all agents finish (while the app is unfocused). */
+  notifications: boolean
+}
+
 /** Persisted terminal tabs for the window, restored on relaunch. `layout` is the
  * opaque tiling tree (validated/cast by the renderer). */
 export interface WorkspacePersist {
@@ -170,6 +232,7 @@ export interface Settings {
   claude: ClaudeSettings
   update: UpdateSettings
   usage: UsageSettings
+  agentActivity: AgentActivitySettings
   /** Selected theme id, or 'auto' to follow the OS appearance. */
   theme: string
   munu: MunuSettings

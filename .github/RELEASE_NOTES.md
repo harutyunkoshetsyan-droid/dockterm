@@ -3,9 +3,14 @@
      past versions; replace this section each release. Older notes live in the
      git history and on each previous GitHub release. -->
 
-## 🎯 What's new in v__VER__ — munu drags smoothly again
+## 🎯 What's new in v__VER__ — see your agents working (live)
 
-- **Fixed dragging the pinned munu mascot.** Moving munu around the screen could stall mid-drag — it would stop following the cursor, then later start chasing the cursor again on its own without you holding the button, leaving it stuck and twitchy. The overlay was flipping itself click-through the moment a fast drag let the cursor outrun the window, which swallowed the rest of the gesture. munu now stays grabbed for the whole drag, releases cleanly, and can never follow the cursor unless the button is actually held.
+DockTerm now shows you **Claude Code's sub-agents as they run** — calm, cute, and completely local.
+
+- **A live count in the top bar.** A little pill shows how many agents are working right now (with a mascot leading the way). Click it for the full picture.
+- **The new Activity panel.** Each running agent as its own card — what it's doing, which project, how long it's taken — grouped by project, with a gentle "working" shimmer. When an agent finishes, its card celebrates and reveals what it found.
+- **A creature swarm under munu.** While agents run, a little family of mascots gathers beneath the floating munu and works away — so you can feel the work happening even from another app.
+- **All local, all read-only.** Reconstructed from your own Claude Code session files on this machine — nothing is sent anywhere, nothing is ever auto-answered. Tune it all (pill, swarm, sounds, whether to show results) in **Settings → Agent activity**.
 
 ---
 

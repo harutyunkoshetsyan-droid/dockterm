@@ -62,6 +62,8 @@ export function SettingsPanel() {
     void update({ editor: { ...s.editor, ...patch } })
   const setGit = (patch: Partial<Settings['git']>) => void update({ git: { ...s.git, ...patch } })
   const setMunu = (patch: Partial<Settings['munu']>) => void update({ munu: { ...s.munu, ...patch } })
+  const setActivity = (patch: Partial<Settings['agentActivity']>) =>
+    void update({ agentActivity: { ...s.agentActivity, ...patch } })
   const setClaude = (patch: Partial<Settings['claude']>) =>
     void update({ claude: { ...s.claude, ...patch } })
 
@@ -331,6 +333,43 @@ export function SettingsPanel() {
           <div className="settings-note">
             munu mirrors what Claude Code is doing. The floating pill stays visible over other
             apps and shows <code>[y/n]</code> when Claude needs you — it never auto-answers.
+          </div>
+        </Section>
+
+        <Section title="Agent activity">
+          <Field label="Show live agents">
+            <Toggle checked={s.agentActivity.enabled} onChange={(v) => setActivity({ enabled: v })} />
+          </Field>
+          <Field label="Top-bar count pill">
+            <Toggle checked={s.agentActivity.pill} onChange={(v) => setActivity({ pill: v })} />
+          </Field>
+          <Field label="Creature swarm under munu">
+            <Toggle checked={s.agentActivity.swarm} onChange={(v) => setActivity({ swarm: v })} />
+          </Field>
+          <Field label="Read each agent's result">
+            <Toggle
+              checked={s.agentActivity.streamOutput}
+              onChange={(v) => setActivity({ streamOutput: v })}
+            />
+          </Field>
+          <div className="settings-note">
+            When on, the Activity panel shows what each finished agent returned (read locally from
+            your Claude Code transcripts, never sent anywhere). Turn off to show status only — type,
+            timing, success/fail — with no message content.
+          </div>
+          <Field label="Sound when agents finish">
+            <Toggle checked={s.agentActivity.sounds} onChange={(v) => setActivity({ sounds: v })} />
+          </Field>
+          <Field label="Notify when backgrounded">
+            <Toggle
+              checked={s.agentActivity.notifications}
+              onChange={(v) => setActivity({ notifications: v })}
+            />
+          </Field>
+          <div className="settings-note">
+            Shows how many sub-agents Claude Code is running right now, what each is doing, and how
+            long it took — live, grouped by project. The <b>Activity</b> panel and the count pill
+            open it in detail.
           </div>
         </Section>
 

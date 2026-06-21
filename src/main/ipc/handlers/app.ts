@@ -11,6 +11,7 @@ import {
   skipUpdate
 } from '../../services/updateChecker'
 import { getUsageSnapshot } from '../../services/usageService'
+import { getAgentActivity } from '../../services/agentActivityService'
 import type { Settings } from '@shared/types'
 import type { Registrar } from '../register'
 
@@ -36,6 +37,8 @@ export function registerAppHandlers(reg: Registrar): void {
   })
 
   reg('usage:get', z.void(), async () => ok(await getUsageSnapshot()))
+
+  reg('activity:get', z.void(), async () => ok(await getAgentActivity()))
 
   reg('update:check', z.void(), async () => {
     const found = await checkForUpdate(true)

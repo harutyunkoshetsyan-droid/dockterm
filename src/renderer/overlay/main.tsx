@@ -287,7 +287,12 @@ function Overlay() {
   // settings popup is open, keep munu revealed even if the cursor leaves the top
   // reveal zone (so reaching down to the popup doesn't tuck it away). The Claude
   // ask-card manages its own reveal, so the popup clause only applies with no card.
-  const shown = pinned || revealed || (popupOpen && !showCard)
+  // Reveal munu (and the swarm beneath it) whenever sub-agents are running, so
+  // you can see the work happening without having to hover or pin. It tucks back
+  // once they finish (the peek keeps it briefly, then it hides).
+  const runningAgents = (activity?.agents ?? []).filter((a) => a.phase === 'running').length
+  const shown =
+    pinned || revealed || (popupOpen && !showCard) || (swarmOn && runningAgents > 0)
 
   return (
     <div className={`ov ov--${platform}${shown ? ' ov--revealed' : ' ov--hidden'}`}>

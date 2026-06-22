@@ -21,7 +21,10 @@ const artState = (a: LiveAgent): MunuState =>
   a.phase === 'running' ? 'working' : a.phase === 'done' ? 'done' : 'asking'
 
 function AgentCard({ agent, now }: { agent: LiveAgent; now: number }) {
-  const elapsed = agent.phase === 'running' ? now - agent.startedAt : (agent.durationMs ?? 0)
+  const elapsed =
+    agent.phase === 'running'
+      ? now - agent.startedAt
+      : (agent.durationMs ?? Math.max(0, (agent.endedAt ?? now) - agent.startedAt))
   return (
     <div className={`agent-card agent-card--${agent.phase}`}>
       <div className="agent-card__rail" aria-hidden />
@@ -57,9 +60,11 @@ function AgentCard({ agent, now }: { agent: LiveAgent; now: number }) {
           <div className="agent-card__working" aria-hidden>
             <span className="agent-card__shimmer" />
           </div>
-        ) : (
-          agent.resultPreview && <div className="agent-card__result">{agent.resultPreview}</div>
-        )}
+        ) : agent.resultPreview ? (
+          <div className="agent-card__result">{agent.resultPreview}</div>
+        ) : agent.phase === 'failed' ? (
+          <div className="agent-card__result agent-card__result--muted">Finished with an error.</div>
+        ) : null}
       </div>
     </div>
   )
@@ -79,15 +84,17 @@ export function ActivityPanel() {
   const running = agents.filter((a) => a.phase === 'running')
   const finished = agents.filter((a) => a.phase !== 'running')
 
-  // Group running agents by project (most-active first via byProject order).
-  const order = activity?.byProject.map((p) => p.project) ?? []
-  const groups = order
-    .map((proj) => ({
-      project: proj,
-      label: activity?.byProject.find((p) => p.project === proj)?.label ?? proj,
-      agents: running.filter((a) => a.project === proj)
-    }))
-    .filter((g) => g.agents.length > 0)
+  // Group running agents by project (most-active first), derived directly from the
+  // agents so no running agent can ever be missing from a group.
+  const groupMap = new Map<string, { label: string; agents: LiveAgent[] }>()
+  for (const a of running) {
+    const g = groupMap.get(a.project) ?? { label: a.projectLabel, agents: [] }
+    g.agents.push(a)
+    groupMap.set(a.project, g)
+  }
+  const groups = [...groupMap.entries()]
+    .map(([project, g]) => ({ project, label: g.label, agents: g.agents }))
+    .sort((x, y) => y.agents.length - x.agents.length)
 
   return (
     <div className="panel">

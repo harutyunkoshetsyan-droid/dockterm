@@ -2929,7 +2929,7 @@
   height: 100%;
   width: 38%;
   border-radius: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 40%, var(--accent) 60%, transparent 100%);
   will-change: transform;
   animation: agent-shimmer 1.3s ease-in-out infinite;
 }
@@ -2944,6 +2944,14 @@
   background: var(--bg);
   border-radius: 4px;
   padding: 6px 8px;
+  animation: agent-enter 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.agent-card__result--muted {
+  font-family: var(--font-ui);
+  font-style: italic;
+  color: var(--danger);
+  opacity: 0.85;
+  background: var(--danger-soft);
 }
 
 @keyframes agent-enter {
@@ -3029,6 +3037,7 @@
 @media (prefers-reduced-motion: reduce) {
   .agent-pill,
   .agent-card,
+  .agent-card__result,
   .agent-card__avatar--running,
   .agent-card__avatar--done,
   .agent-card__avatar--failed,
